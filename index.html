@@ -143,26 +143,27 @@
        REALISTIC CARTOGRAPHIC MAP STYLING
        ========================================================================= */
     .district-path {
-      stroke: #FFFFFF;
+      stroke: rgba(255, 255, 255, 0.92);
       stroke-width: 1.35px;
       stroke-linejoin: round;
       vector-effect: non-scaling-stroke;
       cursor: pointer;
-      transition: fill 0.18s ease, stroke 0.15s ease, stroke-width 0.15s ease, opacity 0.2s ease, filter 0.18s ease;
+      filter: url(#districtInnerBevel);
+      transition: fill 0.22s ease, stroke 0.18s ease, stroke-width 0.18s ease, opacity 0.22s ease, filter 0.22s ease;
     }
 
     /* Subtle visual cursor hint on hover without opening or shifting popup state */
     .district-path:not(.active-selected):hover {
       stroke: #0F172A;
-      stroke-width: 2.2px;
-      filter: brightness(1.04);
+      stroke-width: 2.3px;
+      filter: url(#districtInnerBevel) brightness(1.07) saturate(1.12);
     }
 
     /* Clicked District Glowing Border Highlight */
     .district-path.active-selected {
       stroke: #F59E0B;
-      stroke-width: 4.2px;
-      filter: brightness(1.07) drop-shadow(0 0 10px rgba(245, 158, 11, 0.95)) drop-shadow(0 2px 5px rgba(15, 23, 42, 0.5));
+      stroke-width: 4px;
+      filter: brightness(1.08) saturate(1.15) drop-shadow(0 0 12px rgba(245, 158, 11, 0.95)) drop-shadow(0 3px 6px rgba(15, 23, 42, 0.45));
       animation: selectedDistrictPulse 2.2s ease-in-out infinite;
     }
 
@@ -182,14 +183,15 @@
     }
 
     .district-label {
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 800;
+      letter-spacing: 0.015em;
       fill: #0F172A;
       text-anchor: middle;
       pointer-events: none;
       paint-order: stroke;
-      stroke: rgba(255, 255, 255, 0.98);
-      stroke-width: 3.2px;
+      stroke: rgba(255, 255, 255, 0.96);
+      stroke-width: 1px;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
@@ -197,14 +199,14 @@
     /* National Highway Route Graphics Styling */
     .nh-highway-line {
       fill: none;
-      stroke: #EF4444;
-      stroke-width: 2.8px;
+      stroke: #E11D48;
+      stroke-width: 2.4px;
       stroke-linecap: round;
       stroke-linejoin: round;
-      stroke-dasharray: 6 3;
-      opacity: 0.85;
+      stroke-dasharray: 6 4;
+      opacity: 0.78;
       pointer-events: none;
-      filter: drop-shadow(0 1px 2px rgba(15, 23, 42, 0.4));
+      filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.85));
     }
 
     .nh-shield {
@@ -212,6 +214,22 @@
       font-weight: 900;
       fill: #FFFFFF;
       text-anchor: middle;
+      pointer-events: none;
+    }
+
+    .graticule-line {
+      fill: none;
+      stroke: rgba(148, 163, 184, 0.28);
+      stroke-width: 0.85px;
+      stroke-dasharray: 3 3;
+      pointer-events: none;
+    }
+
+    .coastal-glow-outline {
+      fill: none;
+      stroke: rgba(14, 165, 233, 0.32);
+      stroke-width: 10px;
+      stroke-linejoin: round;
       pointer-events: none;
     }
 
@@ -273,6 +291,23 @@
     }
     .middle-right-flash {
       animation: middleRightPanelFlash 0.85s ease-out forwards;
+    }
+
+    /* Responsive positioning for Welcome Brand Title: Bottom-aligned on Mobile, Middle-Right on Desktop */
+    .welcome-brand-responsive {
+      bottom: 72px;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+    }
+    @media (min-width: 1024px) {
+      .welcome-brand-responsive {
+        top: calc((100vh - 58px) / 2);
+        bottom: auto;
+        left: auto;
+        right: clamp(20px, 3vw, 48px);
+        transform: translateY(-50%);
+      }
     }
 
     /* Realistic Nature Background Slideshow Zoom & Crossfade */
@@ -362,18 +397,31 @@
               </div>
             </div>
 
+            <!-- INITIAL WELCOME BRANDING (BELOW MAP ON MOBILE, MIDDLE-RIGHT ON DESKTOP) -->
+            <div id="welcomeBrandBanner" class="welcome-brand-responsive fixed z-30 pointer-events-none select-none inline-flex flex-col w-max max-w-[92vw] transition-opacity duration-300">
+              <span class="font-display text-base sm:text-xl lg:text-2xl font-bold text-slate-900 leading-none text-left drop-shadow-[0_1px_6px_rgba(255,255,255,0.95)]">
+                The
+              </span>
+              <h1 class="font-display text-3xl sm:text-5xl lg:text-[75px] font-black tracking-tight text-slate-900 leading-[1.08] drop-shadow-[0_2px_10px_rgba(255,255,255,0.95)]">
+                Sahyadri Safari
+              </h1>
+              <p class="mt-1 text-sm sm:text-lg lg:text-2xl font-bold tracking-wide text-rose-500 text-right drop-shadow-[0_1px_6px_rgba(255,255,255,0.95)]">
+                - Tour N Travaller-
+              </p>
+            </div>
+
             <!-- FLOATING ON-MAP MIDDLE-RIGHT FROSTED GLASS POPUP -->
-            <aside id="districtPlacesPanel" style="top: calc((100vh - 58px) / 2); right: clamp(20px, 3vw, 40px); left: auto; transform: translateY(-50%); width: min(560px, calc(100vw - 40px)); max-height: calc(100vh - 106px); box-sizing: border-box;" class="hidden fixed z-40 bg-white/90 backdrop-blur-2xl rounded-3xl border border-white/95 ring-1 ring-slate-900/10 shadow-[0_24px_60px_rgba(15,23,42,0.32)] flex flex-col overflow-hidden text-slate-900 right-popup-enter">
+            <aside id="districtPlacesPanel" style="top: calc((100vh - 58px) / 2); right: clamp(16px, 2.5vw, 36px); left: auto; transform: translateY(-50%); width: min(490px, calc(100vw - 32px)); max-height: calc(100vh - 104px); box-sizing: border-box;" class="hidden fixed z-40 bg-white/90 backdrop-blur-2xl rounded-2xl border border-white/95 ring-1 ring-slate-900/10 shadow-[0_20px_50px_rgba(15,23,42,0.28)] flex flex-col overflow-hidden text-slate-900 right-popup-enter">
               <!-- Popup Header -->
-              <div class="px-5 py-4 bg-gradient-to-r from-amber-50/95 via-white/90 to-orange-50/95 border-b border-slate-200/80 flex items-start justify-between gap-3 shrink-0">
-                <div class="flex items-start gap-3 min-w-0 flex-1">
+              <div class="px-4 py-3 bg-gradient-to-r from-amber-50/95 via-white/90 to-orange-50/95 border-b border-slate-200/80 flex items-start justify-between gap-2.5 shrink-0">
+                <div class="flex items-start gap-2.5 min-w-0 flex-1">
                   <!-- Creative Yellow Maharashtra RTO Number Plate Badge -->
-                  <div id="panelRtoPlate" class="inline-flex items-stretch rounded-[9px] bg-gradient-to-b from-amber-300 via-yellow-400 to-amber-500 border-2 border-slate-950 shadow-[0_3px_8px_rgba(245,158,11,0.4)] overflow-hidden select-none shrink-0 mt-0.5">
-                    <span class="bg-[#0B3B8C] text-white text-[9px] font-black px-1.5 py-1.5 flex flex-col items-center justify-center leading-none tracking-tighter">
-                      <span class="w-1.5 h-1.5 rounded-full bg-amber-300 mb-[2px]"></span>
+                  <div id="panelRtoPlate" class="inline-flex items-stretch rounded-[7px] bg-gradient-to-b from-amber-300 via-yellow-400 to-amber-500 border-[1.5px] border-slate-950 shadow-[0_2px_6px_rgba(245,158,11,0.35)] overflow-hidden select-none shrink-0 mt-0.5">
+                    <span class="bg-[#0B3B8C] text-white text-[8px] font-black px-1 py-1 flex flex-col items-center justify-center leading-none tracking-tighter">
+                      <span class="w-1 h-1 rounded-full bg-amber-300 mb-[2px]"></span>
                       IND
                     </span>
-                    <span id="panelRtoCode" class="px-2.5 py-1.5 text-slate-950 font-mono font-black text-xs sm:text-sm tracking-wider flex items-center whitespace-nowrap">
+                    <span id="panelRtoCode" class="px-2 py-1 text-slate-950 font-mono font-black text-xs tracking-wider flex items-center whitespace-nowrap">
                       MH 12
                     </span>
                   </div>
@@ -382,20 +430,20 @@
                   <div class="min-w-0 flex-1">
                     <h2 class="text-lg sm:text-xl font-black text-slate-900 leading-tight break-words">
                       <span id="panelDistrictEn" class="block">Pune</span>
-                      <span id="panelDistrictMr" class="inline-block mt-1 px-2.5 py-0.5 rounded-md bg-amber-100/90 border border-amber-300/80 text-amber-900 font-marathi text-sm sm:text-base font-bold leading-snug">पुणे</span>
+                      <span id="panelDistrictMr" class="inline-block mt-0.5 px-2 py-0.5 rounded bg-amber-100/90 border border-amber-300/80 text-amber-900 font-marathi text-xs sm:text-sm font-bold leading-snug">पुणे</span>
                     </h2>
-                    <p id="panelDistrictTag" class="mt-1 text-xs font-semibold text-slate-600 truncate">Forts, Lonavala &amp; Karla</p>
+                    <p id="panelDistrictTag" class="mt-0.5 text-xs font-semibold text-slate-600 truncate">Forts, Lonavala &amp; Karla</p>
                   </div>
                 </div>
 
                 <!-- Close Button -->
-                <button id="closePlacesOverlayBtn" type="button" aria-label="Close district popup" class="w-8 h-8 rounded-full bg-slate-900/10 hover:bg-slate-900 hover:text-white text-slate-700 font-black text-sm flex items-center justify-center transition shrink-0 cursor-pointer">
+                <button id="closePlacesOverlayBtn" type="button" aria-label="Close district popup" class="w-7 h-7 rounded-full bg-slate-900/10 hover:bg-slate-900 hover:text-white text-slate-700 font-black text-xs flex items-center justify-center transition shrink-0 cursor-pointer">
                   ✕
                 </button>
               </div>
 
               <!-- Scrollable District Attractions Grid -->
-              <div id="panelPlacesBody" class="p-4 sm:p-5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1 min-h-0">
+              <div id="panelPlacesBody" class="p-3.5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2.5 flex-1 min-h-0">
                 <!-- Populated dynamically when a district is clicked -->
               </div>
             </aside>
@@ -489,12 +537,12 @@
     ];
 
     const DISTRICT_COLORS = [
-      '#FBBF24', '#34D399', '#38BDF8', '#F472B6', '#FB923C', '#A78BFA',
-      '#2DD4BF', '#F87171', '#FACC15', '#4ADE80', '#818CF8', '#E879F9',
-      '#F59E0B', '#10B981', '#0EA5E9', '#EC4899', '#EAB308', '#22C55E',
-      '#6366F1', '#C084FC', '#14B8A6', '#EF4444', '#84CC16', '#3B82F6',
-      '#06B6D4', '#D946EF', '#A3E635', '#FB7185', '#0284C7', '#059669',
-      '#EA580C', '#8B5CF6', '#0D9488', '#DB2777', '#CA8A04', '#16A34A'
+      '#FCD34D', '#6EE7B7', '#7DD3FC', '#F9A8D4', '#FDBA74', '#C4B5FD',
+      '#5EEAD4', '#FCA5A5', '#FDE047', '#86EFAC', '#A5B4FC', '#F0ABFC',
+      '#FBBF24', '#34D399', '#38BDF8', '#F472B6', '#FACC15', '#4ADE80',
+      '#818CF8', '#D8B4FE', '#2DD4BF', '#F87171', '#BEF264', '#93C5FD',
+      '#67E8F9', '#E879F9', '#D9F99D', '#FDA4AF', '#7DD3FC', '#6EE7B7',
+      '#FDBA74', '#C4B5FD', '#5EEAD4', '#F9A8D4', '#FDE047', '#86EFAC'
     ];
 
     const RAW_DISTRICTS = [
@@ -1091,12 +1139,21 @@
     function renderBaseCartography(width, height) {
       if (!projection) return;
       const gridG = mapRoot.append('g').style('pointer-events', 'none');
+
+      // Subtle Latitude / Longitude Cartographic Graticule Grid
+      const graticule = d3.geoGraticule().step([1.5, 1.5]);
+      const gratPath = d3.geoPath().projection(projection);
+      gridG.append('path')
+        .datum(graticule())
+        .attr('class', 'graticule-line')
+        .attr('d', gratPath);
+
       const [sx, sy] = projection([72.25, 17.65]);
       gridG.append('text')
         .attr('x', sx).attr('y', sy)
         .attr('transform', `rotate(-72, ${sx}, ${sy})`)
-        .attr('fill', '#64748B').attr('opacity', 0.65)
-        .attr('font-size', '11px').attr('font-weight', '800').attr('letter-spacing', '4px')
+        .attr('fill', '#0284C7').attr('opacity', 0.45)
+        .attr('font-size', '12px').attr('font-weight', '900').attr('letter-spacing', '6px')
         .attr('text-anchor', 'middle').text('ARABIAN SEA');
 
       // Render National Highways (NH 48, NH 52, NH 60, NH 160)
@@ -1188,7 +1245,7 @@
 
       const boundaryGeo = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [mhBoundary] } };
       // Optimized fit for a larger, bolder map view with inward popup clearance
-      const rightReserve = window.innerWidth >= 1024 ? Math.min(600, Math.round(width * 0.44)) : 15;
+      const rightReserve = window.innerWidth >= 1024 ? Math.min(510, Math.round(width * 0.39)) : 15;
       projection = d3.geoMercator().fitExtent([[12, 10], [Math.max(320, width - rightReserve), height - 20]], boundaryGeo);
       const pathGen = d3.geoPath().projection(projection);
 
@@ -1197,12 +1254,24 @@
       const defs = svgEl.append('defs');
       defs.append('clipPath').attr('id', 'mh-clip-boundary').append('path').attr('d', pathGen(boundaryGeo));
 
-      // Subtle 3D Relief Drop Shadow under Maharashtra
+      // Soft Topographic Depth & Inner Lighting Filter for Districts
+      const bevelFilter = defs.append('filter')
+        .attr('id', 'districtInnerBevel')
+        .attr('x', '-5%').attr('y', '-5%').attr('width', '110%').attr('height', '110%');
+      bevelFilter.append('feDropShadow')
+        .attr('dx', 0).attr('dy', 1.2).attr('stdDeviation', 1.2)
+        .attr('flood-color', '#0F172A').attr('flood-opacity', 0.14);
+
+      // Coastal Sea-Breeze Aura & 3D Relief Drop Shadow under Maharashtra
       mapRoot.append('path')
         .attr('d', pathGen(boundaryGeo))
-        .attr('fill', '#94A3B8')
-        .attr('opacity', 0.45)
-        .attr('transform', 'translate(4, 5)')
+        .attr('class', 'coastal-glow-outline');
+
+      mapRoot.append('path')
+        .attr('d', pathGen(boundaryGeo))
+        .attr('fill', '#64748B')
+        .attr('opacity', 0.35)
+        .attr('transform', 'translate(5, 7)')
         .style('pointer-events', 'none');
 
       const points = MAHARASHTRA_DISTRICTS.map(d => projection(d.coords));
@@ -1279,19 +1348,35 @@
 
           if (geo && geo.features && geo.features.length >= 30) {
             const features = geo.features;
-            const rightReserve = window.innerWidth >= 1024 ? Math.min(600, Math.round(width * 0.44)) : 15;
+            const rightReserve = window.innerWidth >= 1024 ? Math.min(510, Math.round(width * 0.39)) : 15;
             projection = d3.geoMercator().fitExtent([[12, 10], [Math.max(320, width - rightReserve), height - 20]], geo);
             const pathGen = d3.geoPath().projection(projection);
 
             mapRoot.selectAll('*').remove();
             renderBaseCartography(width, height);
 
-            // Subtle 3D Relief Drop Shadow under Maharashtra
+            // Ensure topographic filter exists after SVG clear
+            let defs = svgEl.select('defs');
+            if (defs.empty()) defs = svgEl.append('defs');
+            if (defs.select('#districtInnerBevel').empty()) {
+              const bevelFilter = defs.append('filter')
+                .attr('id', 'districtInnerBevel')
+                .attr('x', '-5%').attr('y', '-5%').attr('width', '110%').attr('height', '110%');
+              bevelFilter.append('feDropShadow')
+                .attr('dx', 0).attr('dy', 1.2).attr('stdDeviation', 1.2)
+                .attr('flood-color', '#0F172A').attr('flood-opacity', 0.14);
+            }
+
+            // Coastal Sea-Breeze Aura & 3D Relief Drop Shadow under Maharashtra
             mapRoot.append('path')
               .attr('d', pathGen(geo))
-              .attr('fill', '#94A3B8')
-              .attr('opacity', 0.45)
-              .attr('transform', 'translate(4, 5)')
+              .attr('class', 'coastal-glow-outline');
+
+            mapRoot.append('path')
+              .attr('d', pathGen(geo))
+              .attr('fill', '#64748B')
+              .attr('opacity', 0.35)
+              .attr('transform', 'translate(5, 7)')
               .style('pointer-events', 'none');
 
             const enriched = features.map((f, idx) => {
@@ -1443,71 +1528,73 @@
     // -------------------------------------------------------------------------
     function closeDistrictPopup() {
       const panelEl = document.getElementById('districtPlacesPanel');
+      const welcomeEl = document.getElementById('welcomeBrandBanner');
       if (panelEl) panelEl.classList.add('hidden');
+      if (welcomeEl) welcomeEl.classList.remove('hidden');
       appState.selectedDistrictId = null;
       appState.isLocked = false;
       updateMapStyling();
     }
 
     function renderDistrictPlacesList(districtId, animatePanel = true, openPopup = true, lockSelection = false) {
-      if (!districtId) return;
-      // Prevent hover events from overriding an already clicked/locked district
-      if (appState.isLocked && !lockSelection && appState.selectedDistrictId && appState.selectedDistrictId !== districtId) {
-        return;
-      }
       const district = getDistrict(districtId);
       if (!district) return;
 
       appState.selectedDistrictId = district.id;
       if (lockSelection) {
         appState.isLocked = true;
-        // Automatically set clicked district as destination in the From -> To Miles Tracker
-        if (appState.fromDistrictId !== district.id) {
-          appState.toDistrictId = district.id;
-          updateMilesTracker(true);
-        }
       }
 
-      updateMapStyling();
+      // Sync destination in the From -> To KM tracker
+      appState.toDistrictId = district.id;
+      updateMilesTracker(true);
 
       const panelEl = document.getElementById('districtPlacesPanel');
-      const rtoEl = document.getElementById('panelRtoCode');
-      const enEl = document.getElementById('panelDistrictEn');
-      const mrEl = document.getElementById('panelDistrictMr');
-      const tagEl = document.getElementById('panelDistrictTag');
+      const rtoCodeEl = document.getElementById('panelRtoCode');
+      const districtEnEl = document.getElementById('panelDistrictEn');
+      const districtMrEl = document.getElementById('panelDistrictMr');
+      const districtTagEl = document.getElementById('panelDistrictTag');
       const bodyEl = document.getElementById('panelPlacesBody');
 
       if (!panelEl || !bodyEl) return;
 
-      if (rtoEl) rtoEl.textContent = district.rto;
-      if (enEl) enEl.textContent = district.name;
-      if (mrEl) mrEl.textContent = district.marathi;
-      if (tagEl) tagEl.textContent = district.tag;
+      if (rtoCodeEl) rtoCodeEl.textContent = district.rto || 'MH';
+      if (districtEnEl) districtEnEl.textContent = district.name;
+      if (districtMrEl) districtMrEl.textContent = district.marathi;
+      if (districtTagEl) districtTagEl.textContent = district.tag || 'Maharashtra Heritage & Nature';
 
+      // Build attraction category cards
       const cardsHtml = PLACE_CATEGORIES.map(cat => {
-        const items = (district.places && district.places[cat.key]) || [];
-        if (items.length === 0) return '';
+        const items = district.places[cat.key];
+        if (!items || items.length === 0) return '';
+        const isHighlighted = appState.selectedCategory === cat.key;
         return `
-          <div class="rounded-2xl bg-white/95 border border-slate-200/90 p-3.5 shadow-xs hover:shadow-md transition">
-            <div class="flex items-center justify-between gap-2 mb-1.5">
+          <div class="rounded-xl p-3 bg-white/95 border ${isHighlighted ? 'border-amber-400 ring-2 ring-amber-300/60' : 'border-slate-200/90'} shadow-xs flex flex-col gap-1.5">
+            <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-1.5 min-w-0">
                 <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
-                <span class="text-[11px] font-black uppercase tracking-wider text-slate-800 truncate">${cat.label}</span>
+                <span class="text-xs font-black uppercase tracking-wider text-slate-900 truncate">${cat.label}</span>
               </div>
-              <span class="px-2 py-0.5 rounded-full text-[11px] font-black border ${cat.badge} shrink-0">${items.length}</span>
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-black ${cat.badge} border shrink-0">${items.length}</span>
             </div>
-            <p class="text-xs font-medium text-slate-600 leading-relaxed">${items.join(', ')}</p>
+            <p class="text-xs sm:text-[13px] font-medium text-slate-700 leading-relaxed">
+              ${items.join(', ')}
+            </p>
           </div>
         `;
       }).filter(Boolean).join('');
 
       bodyEl.innerHTML = cardsHtml || `
         <div class="col-span-full text-center py-6 text-sm font-semibold text-slate-500">
-          Explore scenic trails &amp; local heritage across ${district.name}.
+          Explore scenic attractions across ${district.name}.
         </div>
       `;
 
+      updateMapStyling();
+
       if (openPopup) {
+        const welcomeEl = document.getElementById('welcomeBrandBanner');
+        if (welcomeEl) welcomeEl.classList.add('hidden');
         panelEl.classList.remove('hidden');
         if (animatePanel) {
           panelEl.classList.remove('middle-right-flash');
