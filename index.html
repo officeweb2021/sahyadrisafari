@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Sahyadri Safari Co. | Maharashtra 36-District Interactive Expedition Map</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- D3.js & TopoJSON for realistic district cartography -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://unpkg.com/topojson-client@3"></script>
+  <!-- Google Fonts: Inter, Playfair Display & Noto Sans Devanagari -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@600;700&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+      background-color: #F4F6F9;
+      color: #1E293B;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    .font-display {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+
+    .font-marathi {
+      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+    }
+
+    /* Map container positioning with increased size, clean padding and zero gap below */
+    #mapContainer {
+      position: relative;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 12px;
+      padding-bottom: 0px;
+      margin-bottom: 0px;
+    }
+
+    /* =========================================================================
+       MORNING -> AFTERNOON -> SUNSET -> EVENING ANIMATED BANNER SKY
+       ========================================================================= */
+    .safari-sky-banner {
+      position: relative;
+      transition: background 1.6s ease;
+    }
+
+    /* Automatic 36-second continuous Morning-to-Evening sky cycle */
+    .sky-auto {
+      animation: morningToEveningSky 36s ease-in-out infinite;
+    }
+
+    @keyframes morningToEveningSky {
+      0%, 100% {
+        /* Morning Dawn */
+        background: linear-gradient(135deg, #FF9A76 0%, #FFD89B 38%, #7DD3FC 80%, #1E3A8A 100%);
+      }
+      30% {
+        /* Crisp Sahyadri Midday */
+        background: linear-gradient(135deg, #0284C7 0%, #38BDF8 45%, #BAE6FD 85%, #0F766E 100%);
+      }
+      62% {
+        /* Golden Sunset Dusk */
+        background: linear-gradient(135deg, #7C2D12 0%, #EA580C 38%, #F59E0B 72%, #311042 100%);
+      }
+      84% {
+        /* Starlit Sahyadri Evening / Night */
+        background: linear-gradient(135deg, #060B19 0%, #0F172A 48%, #1E1B4B 85%, #064E3B 100%);
+      }
+    }
+
+    .sky-morning {
+      background: linear-gradient(135deg, #FF9A76 0%, #FFD89B 42%, #7DD3FC 85%, #1E40AF 100%);
+    }
+    .sky-noon {
+      background: linear-gradient(135deg, #0369A1 0%, #0EA5E9 48%, #7DD3FC 88%, #0F766E 100%);
+    }
+    .sky-sunset {
+      background: linear-gradient(135deg, #7C2D12 0%, #EA580C 40%, #F59E0B 75%, #3B0764 100%);
+    }
+    .sky-evening {
+      background: linear-gradient(135deg, #050914 0%, #0F172A 50%, #1E1B4B 85%, #064E3B 100%);
+    }
+
+    /* Animated Sun / Moon Celestial Orb */
+    .celestial-orb {
+      animation: sunArcMove 36s ease-in-out infinite;
+    }
+
+    @keyframes sunArcMove {
+      0%, 100% {
+        transform: translate(0px, 38px) scale(0.95);
+        background: radial-gradient(circle, #FFFBEB 15%, #FDE047 55%, rgba(251, 146, 60, 0) 75%);
+        box-shadow: 0 0 55px 18px rgba(253, 224, 71, 0.55);
+      }
+      30% {
+        transform: translate(180px, -24px) scale(1.08);
+        background: radial-gradient(circle, #FFFFFF 20%, #FEF08A 60%, rgba(254, 240, 138, 0) 78%);
+        box-shadow: 0 0 70px 24px rgba(254, 249, 195, 0.65);
+      }
+      62% {
+        transform: translate(360px, 34px) scale(1.02);
+        background: radial-gradient(circle, #FEF3C7 10%, #FB923C 52%, rgba(234, 88, 12, 0) 76%);
+        box-shadow: 0 0 65px 22px rgba(249, 115, 22, 0.65);
+      }
+      84% {
+        transform: translate(220px, -14px) scale(0.82);
+        background: radial-gradient(circle, #F8FAFC 35%, #CBD5E1 65%, rgba(148, 163, 184, 0) 78%);
+        box-shadow: 0 0 40px 12px rgba(226, 232, 240, 0.45);
+      }
+    }
+
+    /* Twinkling Evening Stars Layer */
+    .evening-stars {
+      animation: starsVisibility 36s ease-in-out infinite;
+    }
+
+    @keyframes starsVisibility {
+      0%, 55%, 100% { opacity: 0; }
+      75%, 92% { opacity: 0.9; }
+    }
+
+    /* Gentle Drifting Mist / Clouds */
+    .cloud-drift-slow {
+      animation: cloudDrift 48s linear infinite;
+    }
+    .cloud-drift-fast {
+      animation: cloudDrift 32s linear infinite reverse;
+    }
+
+    @keyframes cloudDrift {
+      0% { transform: translateX(-4%); }
+      50% { transform: translateX(4%); }
+      100% { transform: translateX(-4%); }
+    }
+
+    /* =========================================================================
+       REALISTIC CARTOGRAPHIC MAP STYLING
+       ========================================================================= */
+    .district-path {
+      stroke: #FFFFFF;
+      stroke-width: 1.35px;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+      cursor: pointer;
+      transition: fill 0.18s ease, stroke 0.15s ease, stroke-width 0.15s ease, opacity 0.2s ease, filter 0.18s ease;
+    }
+
+    /* Subtle visual cursor hint on hover without opening or shifting popup state */
+    .district-path:not(.active-selected):hover {
+      stroke: #0F172A;
+      stroke-width: 2.2px;
+      filter: brightness(1.04);
+    }
+
+    /* Clicked District Glowing Border Highlight */
+    .district-path.active-selected {
+      stroke: #F59E0B;
+      stroke-width: 4.2px;
+      filter: brightness(1.07) drop-shadow(0 0 10px rgba(245, 158, 11, 0.95)) drop-shadow(0 2px 5px rgba(15, 23, 42, 0.5));
+      animation: selectedDistrictPulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes selectedDistrictPulse {
+      0%, 100% {
+        stroke: #F59E0B;
+        stroke-width: 3.8px;
+      }
+      50% {
+        stroke: #FEF08A;
+        stroke-width: 4.8px;
+      }
+    }
+
+    .district-path.dimmed {
+      opacity: 0.22;
+    }
+
+    .district-label {
+      font-size: 9px;
+      font-weight: 800;
+      fill: #0F172A;
+      text-anchor: middle;
+      pointer-events: none;
+      paint-order: stroke;
+      stroke: rgba(255, 255, 255, 0.98);
+      stroke-width: 3.2px;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* National Highway Route Graphics Styling */
+    .nh-highway-line {
+      fill: none;
+      stroke: #EF4444;
+      stroke-width: 2.8px;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 6 3;
+      opacity: 0.85;
+      pointer-events: none;
+      filter: drop-shadow(0 1px 2px rgba(15, 23, 42, 0.4));
+    }
+
+    .nh-shield {
+      font-size: 8px;
+      font-weight: 900;
+      fill: #FFFFFF;
+      text-anchor: middle;
+      pointer-events: none;
+    }
+
+    .district-famous-icon {
+      font-size: 13px;
+      text-anchor: middle;
+      pointer-events: none;
+      filter: drop-shadow(0 1px 2px rgba(15, 23, 42, 0.35));
+    }
+
+    .district-famous-icon {
+      font-size: 12px;
+      text-anchor: middle;
+      pointer-events: none;
+      filter: drop-shadow(0 1px 2px rgba(15, 23, 42, 0.3));
+    }
+
+    #maharashtraSvg {
+      cursor: pointer;
+    }
+
+    /* Right Panel Highlight Pulse when District is Clicked */
+    @keyframes listHighlightPulse {
+      0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.65); }
+      60% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+      100% { box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15); }
+    }
+    .panel-flash {
+      animation: listHighlightPulse 0.85s ease-out;
+    }
+
+    @keyframes rightPopupSlideIn {
+      0% {
+        opacity: 0;
+        transform: translate(28px, -50%) scale(0.97);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(0, -50%) scale(1);
+      }
+    }
+    .right-popup-enter {
+      animation: rightPopupSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes middleRightPanelFlash {
+      0% {
+        transform: translateY(-50%) scale(1);
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.65);
+      }
+      60% {
+        transform: translateY(-50%) scale(1);
+        box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+      }
+      100% {
+        transform: translateY(-50%) scale(1);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+      }
+    }
+    .middle-right-flash {
+      animation: middleRightPanelFlash 0.85s ease-out forwards;
+    }
+
+    /* Realistic Nature Background Slideshow Zoom & Crossfade */
+    @keyframes natureKenBurns {
+      0% { transform: scale(1.03) translate(0%, 0%); }
+      50% { transform: scale(1.1) translate(-1.2%, -0.8%); }
+      100% { transform: scale(1.03) translate(0%, 0%); }
+    }
+    .nature-slide-motion {
+      animation: natureKenBurns 22s ease-in-out infinite;
+    }
+
+    @keyframes ambientAuroraPulse {
+      0%, 100% { opacity: 0.72; transform: scale(1); }
+      50% { opacity: 0.92; transform: scale(1.06); }
+    }
+    .ambient-aurora-glow {
+      animation: ambientAuroraPulse 14s ease-in-out infinite;
+    }
+
+    /* Animated Tourist Car Road Strip */
+    @keyframes roadCarDrive {
+      0% { transform: translateX(-140px); }
+      100% { transform: translateX(calc(100vw + 140px)); }
+    }
+    .road-car-anim {
+      animation: roadCarDrive 14s linear infinite;
+    }
+
+    @keyframes roadStripeMove {
+      0% { background-position: 0 0; }
+      100% { background-position: -80px 0; }
+    }
+    .road-stripes {
+      background-image: linear-gradient(90deg, #FACC15 55%, transparent 55%);
+      background-size: 40px 4px;
+      animation: roadStripeMove 0.85s linear infinite;
+    }
+
+    /* Route Line between From & To Districts on Map */
+    .safari-route-line {
+      fill: none;
+      stroke: #0F172A;
+      stroke-width: 3.5px;
+      stroke-linecap: round;
+      stroke-dasharray: 8 6;
+      pointer-events: none;
+      filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.95));
+      animation: routeDashFlow 1.2s linear infinite;
+    }
+
+    @keyframes routeDashFlow {
+      to { stroke-dashoffset: -28; }
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #E2E8F0; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #64748B; }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col selection:bg-amber-400 selection:text-slate-950">
+
+  <!-- =========================================================================
+       FULL-SCREEN 36-DISTRICT COLORFUL MAHARASHTRA MAP & FLOATING POPUP
+       ========================================================================= -->
+  <section id="bannerSection" class="relative overflow-hidden h-screen w-full flex flex-col justify-between p-0 bg-gradient-to-br from-slate-50 via-stone-100 to-sky-50">
+    <!-- Main Banner Workspace Content with Expanded Map proportions -->
+    <div class="max-w-[1800px] w-full mx-auto relative z-10 flex-1 flex flex-col min-h-0 px-2 sm:px-4 pt-1 pb-0">
+      <div id="activeCategoryBadge" class="hidden self-start mb-0.5 px-3 py-0.5 rounded-full bg-amber-400 text-slate-950 text-xs font-black uppercase shadow-lg">All Themes</div>
+
+      <div class="flex-1 flex flex-col min-h-0">
+        <div class="w-full bg-transparent flex flex-col overflow-hidden flex-1 min-h-0">
+          <div id="mapContainer" class="relative flex-1 w-full h-full bg-transparent overflow-hidden select-none pb-0 mb-0">
+            <svg id="maharashtraSvg" class="w-full h-full block absolute inset-0"></svg>
+
+            <!-- Compass Rose (Top Left) -->
+            <div class="absolute top-2.5 left-2.5 pointer-events-none flex items-center z-10">
+              <div class="w-9 h-9 rounded-full bg-white/95 border border-slate-300 shadow-md flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 40 40" class="w-6 h-6">
+                  <circle cx="20" cy="20" r="17" fill="none" stroke="#64748B" stroke-width="1" stroke-dasharray="2,2"/>
+                  <polygon points="20,4 24,20 20,17 16,20" fill="#D97706"/>
+                  <polygon points="20,36 24,20 20,23 16,20" fill="#475569"/>
+                  <text x="20" y="11" text-anchor="middle" font-size="6.5" font-weight="900" fill="#0F172A">N</text>
+                </svg>
+              </div>
+            </div>
+
+            <!-- FLOATING ON-MAP MIDDLE-RIGHT FROSTED GLASS POPUP -->
+            <aside id="districtPlacesPanel" style="top: calc((100vh - 58px) / 2); right: clamp(20px, 3vw, 40px); left: auto; transform: translateY(-50%); width: min(560px, calc(100vw - 40px)); max-height: calc(100vh - 106px); box-sizing: border-box;" class="hidden fixed z-40 bg-white/90 backdrop-blur-2xl rounded-3xl border border-white/95 ring-1 ring-slate-900/10 shadow-[0_24px_60px_rgba(15,23,42,0.32)] flex flex-col overflow-hidden text-slate-900 right-popup-enter">
+              <!-- Popup Header -->
+              <div class="px-5 py-4 bg-gradient-to-r from-amber-50/95 via-white/90 to-orange-50/95 border-b border-slate-200/80 flex items-start justify-between gap-3 shrink-0">
+                <div class="flex items-start gap-3 min-w-0 flex-1">
+                  <!-- Creative Yellow Maharashtra RTO Number Plate Badge -->
+                  <div id="panelRtoPlate" class="inline-flex items-stretch rounded-[9px] bg-gradient-to-b from-amber-300 via-yellow-400 to-amber-500 border-2 border-slate-950 shadow-[0_3px_8px_rgba(245,158,11,0.4)] overflow-hidden select-none shrink-0 mt-0.5">
+                    <span class="bg-[#0B3B8C] text-white text-[9px] font-black px-1.5 py-1.5 flex flex-col items-center justify-center leading-none tracking-tighter">
+                      <span class="w-1.5 h-1.5 rounded-full bg-amber-300 mb-[2px]"></span>
+                      IND
+                    </span>
+                    <span id="panelRtoCode" class="px-2.5 py-1.5 text-slate-950 font-mono font-black text-xs sm:text-sm tracking-wider flex items-center whitespace-nowrap">
+                      MH 12
+                    </span>
+                  </div>
+
+                  <!-- District English Name + Line Break + Marathi Name + Tag -->
+                  <div class="min-w-0 flex-1">
+                    <h2 class="text-lg sm:text-xl font-black text-slate-900 leading-tight break-words">
+                      <span id="panelDistrictEn" class="block">Pune</span>
+                      <span id="panelDistrictMr" class="inline-block mt-1 px-2.5 py-0.5 rounded-md bg-amber-100/90 border border-amber-300/80 text-amber-900 font-marathi text-sm sm:text-base font-bold leading-snug">पुणे</span>
+                    </h2>
+                    <p id="panelDistrictTag" class="mt-1 text-xs font-semibold text-slate-600 truncate">Forts, Lonavala &amp; Karla</p>
+                  </div>
+                </div>
+
+                <!-- Close Button -->
+                <button id="closePlacesOverlayBtn" type="button" aria-label="Close district popup" class="w-8 h-8 rounded-full bg-slate-900/10 hover:bg-slate-900 hover:text-white text-slate-700 font-black text-sm flex items-center justify-center transition shrink-0 cursor-pointer">
+                  ✕
+                </button>
+              </div>
+
+              <!-- Scrollable District Attractions Grid -->
+              <div id="panelPlacesBody" class="p-4 sm:p-5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1 min-h-0">
+                <!-- Populated dynamically when a district is clicked -->
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Animated Road & Moving Tourist Safari Car with Live From -> To All-District Miles Tracker -->
+    <div class="relative w-full h-[58px] bg-slate-950 border-t-2 border-b-2 border-amber-400 shadow-[0_-4px_20px_rgba(15,23,42,0.5)] overflow-hidden m-0 p-0 flex items-center justify-between px-2 sm:px-4 z-30 shrink-0">
+      <!-- Asphalt Texture & Center Dashed Stripes -->
+      <div class="absolute inset-0 bg-slate-900"></div>
+      <div class="absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 road-stripes opacity-85"></div>
+
+      <!-- Moving Tourist Safari Car in Aura White Color -->
+      <div class="absolute bottom-1 z-20 road-car-anim flex items-center pointer-events-none">
+        <div class="relative flex items-center">
+          <!-- Safari Car Body SVG (Aura White Edition) -->
+          <svg viewBox="0 0 110 46" class="w-24 h-10 drop-shadow-[0_4px_8px_rgba(0,0,0,0.65)]">
+            <!-- Roof Luggage / Carrier -->
+            <rect x="25" y="4" width="45" height="4" rx="1.5" fill="#334155"/>
+            <rect x="32" y="1" width="12" height="4" rx="1" fill="#F59E0B"/>
+            <rect x="48" y="1" width="16" height="4" rx="1" fill="#10B981"/>
+            <!-- Car Body (Glossy Aura White with sleek dark trim) -->
+            <path d="M10,26 L15,16 Q20,10 32,10 L75,10 Q88,10 94,18 L100,26 L102,34 Q102,38 96,38 L14,38 Q8,38 8,34 Z" fill="#F8FAFC" stroke="#0F172A" stroke-width="2"/>
+            <!-- Modern Aura Grille Accent -->
+            <path d="M98,28 L102,28 L102,34 L98,34 Z" fill="#0EA5E9"/>
+            <!-- Windows -->
+            <path d="M30,13 L45,13 L45,24 L22,24 Q24,15 30,13 Z" fill="#1E293B" stroke="#0F172A" stroke-width="1.5"/>
+            <path d="M49,13 L75,13 Q78,18 78,24 L49,24 Z" fill="#1E293B" stroke="#0F172A" stroke-width="1.5"/>
+            <!-- Headlights & Tail Lights -->
+            <rect x="96" y="27" width="4" height="6" rx="1" fill="#FEF08A"/>
+            <rect x="3" y="28" width="5" height="5" rx="1.5" fill="#EF4444"/>
+            <!-- Maharashtra RTO Number Plate on Car -->
+            <rect x="70" y="28" width="20" height="7" rx="1" fill="#FACC15" stroke="#0F172A" stroke-width="0.8"/>
+            <text id="carRtoText" x="80" y="33.5" font-size="4.5" font-weight="900" fill="#0F172A" text-anchor="middle">MH 12</text>
+            <!-- Wheels with Alloy rims -->
+            <circle cx="28" cy="38" r="7.5" fill="#1E293B" stroke="#94A3B8" stroke-width="2"/>
+            <circle cx="28" cy="38" r="2.5" fill="#E2E8F0"/>
+            <circle cx="82" cy="38" r="7.5" fill="#1E293B" stroke="#94A3B8" stroke-width="2"/>
+            <circle cx="82" cy="38" r="2.5" fill="#E2E8F0"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Interactive From -> To 36-District Distance & Miles Tracker Control Bar -->
+      <div class="relative z-20 mx-auto flex items-center gap-1.5 sm:gap-2.5 bg-slate-950/90 backdrop-blur-md border border-amber-400/70 rounded-full px-2.5 sm:px-4 py-1 shadow-[0_4px_16px_rgba(0,0,0,0.65)]">
+        <div class="flex items-center gap-1">
+          <span class="text-[10px] font-black uppercase tracking-wider text-emerald-400 hidden sm:inline">From</span>
+          <select id="fromDistrictSelect" aria-label="From District" class="bg-slate-800 hover:bg-slate-700 text-white text-[11px] sm:text-xs font-bold rounded-full px-2 py-0.5 border border-slate-600 focus:outline-none focus:border-amber-400 cursor-pointer max-w-[115px] sm:max-w-[145px]">
+          </select>
+        </div>
+
+        <button id="swapDistrictsBtn" type="button" title="Swap From & To Districts" class="w-6 h-6 rounded-full bg-amber-400/20 hover:bg-amber-400 text-amber-300 hover:text-slate-950 text-xs font-black flex items-center justify-center transition cursor-pointer shrink-0">⇄</button>
+
+        <div class="flex items-center gap-1">
+          <span class="text-[10px] font-black uppercase tracking-wider text-amber-400 hidden sm:inline">To</span>
+          <select id="toDistrictSelect" aria-label="To District" class="bg-slate-800 hover:bg-slate-700 text-white text-[11px] sm:text-xs font-bold rounded-full px-2 py-0.5 border border-slate-600 focus:outline-none focus:border-amber-400 cursor-pointer max-w-[115px] sm:max-w-[145px]">
+          </select>
+        </div>
+
+        <div class="h-4 w-[1px] bg-slate-700 mx-0.5"></div>
+
+        <!-- Live Odometer KM Readout -->
+        <div class="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
+          <span class="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[11px] sm:text-xs font-black tracking-tight shadow-xs">
+            <span id="trackerKmVal">89</span> KM
+          </span>
+          <span id="trackerDriveTime" class="hidden md:inline-block text-[11px] font-bold text-amber-300">
+            (~1h 51m)
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       JAVASCRIPT: 36-DISTRICT MAHARASHTRA DATA, MAP RENDERER & INTERACTIVITY
+       ========================================================================= -->
+  <script>
+    const PLACE_CATEGORIES = [
+      { key: 'forts',       label: 'Forts',                  marathi: 'किल्ले',            icon: '🏰', badge: 'bg-amber-100 text-amber-900 border-amber-300' },
+      { key: 'caves',       label: 'Caves',                  marathi: 'लेणी',              icon: '🕳️', badge: 'bg-stone-100 text-stone-900 border-stone-300' },
+      { key: 'temples',     label: 'Temples',                marathi: 'मंदिरे',            icon: '🛕', badge: 'bg-orange-100 text-orange-900 border-orange-300' },
+      { key: 'beaches',     label: 'Beaches',                marathi: 'समुद्रकिनारे',      icon: '🏖️', badge: 'bg-cyan-100 text-cyan-900 border-cyan-300' },
+      { key: 'wildlife',    label: 'Wildlife / Sanctuary',   marathi: 'अभयारण्य',          icon: '🐅', badge: 'bg-emerald-100 text-emerald-900 border-emerald-300' },
+      { key: 'heritage',    label: 'Heritage',               marathi: 'ऐतिहासिक वारसा',     icon: '🏛️', badge: 'bg-purple-100 text-purple-900 border-purple-300' },
+      { key: 'hillstation', label: 'Natural / Hill Station', marathi: 'थंड हवेची ठिकाणे', icon: '⛰️', badge: 'bg-teal-100 text-teal-900 border-teal-300' },
+      { key: 'dams',        label: 'Dams',                   marathi: 'धरणे',              icon: '🌊', badge: 'bg-sky-100 text-sky-900 border-sky-300' },
+      { key: 'waterfalls',  label: 'Waterfalls',             marathi: 'धबधबे',             icon: '💦', badge: 'bg-indigo-100 text-indigo-900 border-indigo-300' }
+    ];
+
+    const DISTRICT_COLORS = [
+      '#FBBF24', '#34D399', '#38BDF8', '#F472B6', '#FB923C', '#A78BFA',
+      '#2DD4BF', '#F87171', '#FACC15', '#4ADE80', '#818CF8', '#E879F9',
+      '#F59E0B', '#10B981', '#0EA5E9', '#EC4899', '#EAB308', '#22C55E',
+      '#6366F1', '#C084FC', '#14B8A6', '#EF4444', '#84CC16', '#3B82F6',
+      '#06B6D4', '#D946EF', '#A3E635', '#FB7185', '#0284C7', '#059669',
+      '#EA580C', '#8B5CF6', '#0D9488', '#DB2777', '#CA8A04', '#16A34A'
+    ];
+
+    const RAW_DISTRICTS = [
+      {
+        id: 'ahilyanagar', rto: 'MH 16 / MH 17', name: 'Ahilyanagar', marathi: 'अहिल्यानगर', icon: '', tag: 'Shirdi & Bhandardara', aliases: ['ahmednagar', 'ahmadnagar', 'ahilyanagar'], coords: [74.74, 19.09],
+        places: {
+          forts: ['Harishchandragad', 'Ratangad', 'Ahmednagar Fort', 'Kulang', 'Alang', 'Madangad'],
+          caves: ['Harishchandragad Kedareshwar Caves', 'Dhokeshwar Caves'],
+          temples: ['Shirdi Sai Baba Temple', 'Shani Shingnapur', 'Siddhatek (Ashtavinayak)', 'Amruteshwar Temple (Ratanwadi)'],
+          wildlife: ['Kalsubai Harishchandragad Wildlife Sanctuary', 'Rehekuri Blackbuck Sanctuary'],
+          heritage: ['Chand Bibi Mahal', 'Cavalry Tank Museum'],
+          hillstation: ['Bhandardara', 'Kalsubai Peak (Highest Peak in MH)', 'Sandhan Valley'],
+          dams: ['Wilson Dam (Bhandardara)', 'Mula Dam', 'Nilwande Dam'],
+          waterfalls: ['Randha Falls', 'Umbrella Falls']
+        }
+      },
+      {
+        id: 'akola', rto: 'MH 30', name: 'Akola', marathi: 'अकोला', icon: '', tag: 'Narnala & Balapur', aliases: ['akola'], coords: [77.00, 20.70],
+        places: {
+          forts: ['Akola Fort (Asadgad)', 'Balapur Fort', 'Narnala Fort'],
+          temples: ['Rajrajeshwar Temple', 'Salasar Balaji Temple'],
+          wildlife: ['Narnala Wildlife Sanctuary', 'Karanja Sohol Blackbuck Sanctuary (Border)'],
+          heritage: ['Balapur Chhatri', 'Asadgad Bastions'],
+          dams: ['Katepurna Dam', 'Mahan Dam']
+        }
+      },
+      {
+        id: 'amravati', rto: 'MH 27', name: 'Amravati', marathi: 'अमरावती', icon: '', tag: 'Chikhaldara & Melghat', aliases: ['amravati', 'amraoti'], coords: [77.75, 20.93],
+        places: {
+          forts: ['Gawilgad Fort', 'Narnala Fort (Border)'],
+          temples: ['Ambadevi & Ekveera Devi Temple', 'Muktagiri (52 Jain Temples)', 'Gurukunj Ashram (Mozari)'],
+          wildlife: ['Melghat Tiger Reserve', 'Gugamal National Park', 'Wan Wildlife Sanctuary'],
+          heritage: ['Gawilgad Historic Fortifications'],
+          hillstation: ['Chikhaldara Hill Station', 'Semadoh'],
+          dams: ['Upper Wardha Dam (Morshi)'],
+          waterfalls: ['Bhimkund', 'Panchbol Point Cascades', 'Muktagiri Waterfall']
+        }
+      },
+      {
+        id: 'beed', rto: 'MH 23 / MH 44', name: 'Beed', marathi: 'बीड', icon: '', tag: 'Parli Vaijnath', aliases: ['beed', 'bid'], coords: [75.76, 18.99],
+        places: {
+          forts: ['Dharur Fort'],
+          temples: ['Parli Vaijnath (Jyotirlinga)', 'Yogeshwari Temple (Ambajogai)', 'Kankaleshwar Temple'],
+          wildlife: ['Naigaon Peacock Sanctuary'],
+          heritage: ['Khazana Bawdi', 'Shahinshah Wali Dargah'],
+          dams: ['Majalgaon Dam', 'Bindusara Dam'],
+          waterfalls: ['Kapildhar Waterfall', 'Sautada Waterfall']
+        }
+      },
+      {
+        id: 'bhandara', rto: 'MH 36', name: 'Bhandara', marathi: 'भंडारा', icon: '', tag: 'Gosikhurd & Lakes', aliases: ['bhandara'], coords: [79.65, 21.17],
+        places: {
+          forts: ['Ambhora Fort'],
+          temples: ['Ambhora Temple (River Confluence)', 'Chandpur Hanuman Temple'],
+          wildlife: ['Koka Wildlife Sanctuary', 'Umred-Karhandla (Border)'],
+          heritage: ['Pauni Ancient Buddhist Stupa Sites'],
+          dams: ['Gosikhurd Dam (Indira Sagar)', 'Rawanwadi Dam']
+        }
+      },
+      {
+        id: 'buldhana', rto: 'MH 28', name: 'Buldhana', marathi: 'बुलढाणा', icon: '', tag: 'Lonar Crater Lake', aliases: ['buldhana', 'buldana'], coords: [76.18, 20.53],
+        places: {
+          temples: ['Gajanan Maharaj Temple (Shegaon)', 'Sailani Baba Dargah', 'Balaji Temple (Mehkar)'],
+          wildlife: ['Lonar Wildlife Sanctuary', 'Ambabarwa Wildlife Sanctuary', 'Dnyanganga Sanctuary'],
+          heritage: ['Anand Sagar (Shegaon)', 'Sindkhed Raja (Birthplace of Rajmata Jijau)'],
+          hillstation: ['Lonar Crater Lake (Meteorite Impact Crater)'],
+          dams: ['Nalganga Dam', 'Khadakpurna Dam']
+        }
+      },
+      {
+        id: 'chandrapur', rto: 'MH 34', name: 'Chandrapur', marathi: 'चंद्रपूर', icon: '', tag: 'Tadoba Tiger Reserve', aliases: ['chandrapur', 'chanda'], coords: [79.30, 19.96],
+        places: {
+          forts: ['Ballarpur Fort', 'Chandrapur Fort (Gond Walls)', 'Manikgad'],
+          caves: ['Bhandak Buddhist Caves'],
+          temples: ['Mahakali Temple (Chandrapur)', 'Bhadravati Jain Temple'],
+          wildlife: ['Tadoba-Andhari Tiger Reserve'],
+          heritage: ['Gond Raja Tombs & Fort Gates'],
+          dams: ['Irai Dam', 'Asolamendha Lake']
+        }
+      },
+      {
+        id: 'chhatrapati_sambhajinagar', rto: 'MH 20', name: 'Chhatrapati Sambhajinagar', marathi: 'छत्रपती संभाजीनगर', icon: '', tag: 'Ajanta & Ellora', aliases: ['aurangabad', 'chhatrapati sambhajinagar', 'chatrapati sambhajinagar', 'sambhajinagar', 'chhatrapatisambhajinagar', 'chatrapatisambhajinagar'], coords: [75.34, 19.88],
+        places: {
+          forts: ['Daulatabad (Devagiri) Fort', 'Antur Fort'],
+          caves: ['Ajanta Caves (UNESCO)', 'Ellora Caves (UNESCO)', 'Aurangabad Caves', 'Pitalkhora Caves'],
+          temples: ['Grishneshwar (Jyotirlinga)', 'Bhadra Maruti (Khuldabad)'],
+          wildlife: ['Gautala Autramghat Sanctuary', 'Jayakwadi Bird Sanctuary'],
+          heritage: ['Bibi Ka Maqbara', 'Panchakki', '52 Historic Gates', 'Khuldabad'],
+          hillstation: ['Mhaismal Hill Station'],
+          dams: ['Jayakwadi Dam (Nath Sagar, Paithan)'],
+          waterfalls: ['Sita Nahani (Ajanta)', 'Gautala Seasonal Falls']
+        }
+      },
+      {
+        id: 'dharashiv', rto: 'MH 25', name: 'Dharashiv', marathi: 'धाराशिव', icon: '', tag: 'Tulja Bhavani', aliases: ['osmanabad', 'dharashiv'], coords: [76.04, 18.18],
+        places: {
+          forts: ['Naldurg Fort', 'Paranda Fort'],
+          caves: ['Dharashiv Caves', 'Ter Archaeological Mounds'],
+          temples: ['Tulja Bhavani Temple (Tuljapur)', 'Saint Goroba Kaka Temple (Ter)', 'Kunthalgiri'],
+          wildlife: ['Yedshi Ramling Ghat Wildlife Sanctuary'],
+          heritage: ['Ter Ancient Satavahana Excavations'],
+          dams: ['Terna Dam', 'Sina Kolegaon Dam'],
+          waterfalls: ['Naldurg Waterfalls (Nar-Madi)', 'Ramling Waterfall']
+        }
+      },
+      {
+        id: 'dhule', rto: 'MH 18', name: 'Dhule', marathi: 'धुळे', icon: '', tag: 'Laling & Songir Forts', aliases: ['dhule', 'dhulia'], coords: [74.77, 20.90],
+        places: {
+          forts: ['Laling Fort', 'Songir Fort', 'Bhamer Fort', 'Thalner Fort'],
+          caves: ['Bhamer Caves'],
+          temples: ['Ekvira Devi Temple (Dhule)', 'Swaminarayan Temple'],
+          wildlife: ['Aner Dam Wildlife Sanctuary'],
+          heritage: ['Rajwade Sanshodhan Mandal Museum'],
+          dams: ['Aner Dam', 'Panzara Dam', 'Sulwade Barrage']
+        }
+      },
+      {
+        id: 'gadchiroli', rto: 'MH 33', name: 'Gadchiroli', marathi: 'गडचिरोली', icon: '', tag: 'Markanda & Forests', aliases: ['gadchiroli'], coords: [80.00, 20.18],
+        places: {
+          forts: ['Vairagad Fort', 'Tipagad'],
+          temples: ['Markandadeo Temple Complex ("Mini Khajuraho")', 'Chaprala Temple'],
+          wildlife: ['Chaprala Wildlife Sanctuary', 'Bhamragad Wildlife Sanctuary'],
+          heritage: ['Hemadpanthi Riverbank Sculptures of Markanda'],
+          hillstation: ['Bhamragad Forest Hills', 'Surjagad Hills'],
+          dams: ['Dina Dam']
+        }
+      },
+      {
+        id: 'gondia', rto: 'MH 35', name: 'Gondia', marathi: 'गोंदिया', icon: '', tag: 'Navegaon & Nagzira', aliases: ['gondia', 'gondiya'], coords: [80.19, 21.46],
+        places: {
+          forts: ['Pratapgad (Gondia)'],
+          caves: ['Kachargadh Sacred Natural Caves'],
+          temples: ['Suryadeo Temple (Mando Devi)', 'Kachargadh Tribal Shrine'],
+          wildlife: ['Navegaon National Park', 'Nagzira Wildlife Sanctuary'],
+          dams: ['Itiadoh Dam', 'Navegaon Bandh', 'Bodalkasa Lake'],
+          waterfalls: ['Hazara Falls (Salekasa)']
+        }
+      },
+      {
+        id: 'hingoli', rto: 'MH 38', name: 'Hingoli', marathi: 'हिंगोली', icon: '', tag: 'Aundha Nagnath', aliases: ['hingoli'], coords: [77.15, 19.72],
+        places: {
+          temples: ['Aundha Nagnath (Jyotirlinga)', 'Mallinath Digambar Jain Temple', 'Sant Namdev Sansthan (Narsi)'],
+          heritage: ['13th-Century Yadava Stone Carvings at Aundha'],
+          dams: ['Isapur Dam', 'Siddheshwar Dam Backwaters']
+        }
+      },
+      {
+        id: 'jalgaon', rto: 'MH 19', name: 'Jalgaon', marathi: 'जळगाव', icon: '', tag: 'Padmalaya & Yawal', aliases: ['jalgaon'], coords: [75.56, 21.00],
+        places: {
+          forts: ['Amalner Fort', 'Parola Fort (Jhansi Rani Maternal Heritage)'],
+          caves: ['Patnadevi Caves'],
+          temples: ['Padmalaya (Ganesh Temple)', 'Muktainagar (Sant Muktabai)', 'Patnadevi Temple'],
+          wildlife: ['Yawal Wildlife Sanctuary'],
+          hillstation: ['Pal Hill Station (Satpura Range)', 'Unapdev Hot Springs'],
+          dams: ['Hatnur Dam', 'Waghur Dam', 'Girna Dam']
+        }
+      },
+      {
+        id: 'jalna', rto: 'MH 21', name: 'Jalna', marathi: 'जालना', icon: '', tag: 'Matsyodari Devi', aliases: ['jalna'], coords: [75.88, 19.84],
+        places: {
+          forts: ['Jalna Fort'],
+          temples: ['Matsyodari Devi Temple (Ambad)', 'Jamb Samarth (Ramdas Swami Birthplace)', 'Shri Anandi Swami Temple'],
+          heritage: ['Kali Masjid & Historic Sarai'],
+          dams: ['Ghanewadi Dam', 'Lower Dudhna Dam']
+        }
+      },
+      {
+        id: 'kolhapur', rto: 'MH 09', name: 'Kolhapur', marathi: 'कोल्हापूर', icon: '', tag: 'Mahalakshmi & Panhala', aliases: ['kolhapur'], coords: [74.24, 16.70],
+        places: {
+          forts: ['Panhala Fort', 'Vishalgad', 'Bhudargad', 'Samangad', 'Ragna Fort'],
+          caves: ['Pohala Caves', 'Masai Pathar Caves'],
+          temples: ['Mahalakshmi (Ambabai) Temple', 'Jyotiba Temple', 'Kopeshwar Temple (Khidrapur)', 'Narsobachi Wadi'],
+          wildlife: ['Radhanagari Wildlife Sanctuary (Dajipur Bison Sanctuary)'],
+          heritage: ['New Palace (Shahu Museum)', 'Shalini Palace', 'Rankala Lake'],
+          hillstation: ['Panhala Hill Station', 'Gaganbawda', 'Amba Ghat'],
+          dams: ['Radhanagari Dam', 'Kalammawadi Dam'],
+          waterfalls: ['Rautwadi Waterfall', 'Barki Waterfall', 'Ramtirth Waterfall']
+        }
+      },
+      {
+        id: 'latur', rto: 'MH 24', name: 'Latur', marathi: 'लातूर', icon: '', tag: 'Udgir & Kharosa Caves', aliases: ['latur'], coords: [76.56, 18.40],
+        places: {
+          forts: ['Udgir Fort', 'Ausa Fort'],
+          caves: ['Kharosa Caves'],
+          temples: ['Ashtavinayak Temple (Latur)', 'Siddheshwar & Ratneshwar Temple', 'Hattibet-Devarjan'],
+          heritage: ['Ganj Golai (Circular Market Architecture)'],
+          dams: ['Manjara Dam']
+        }
+      },
+      {
+        id: 'mumbai_city', rto: 'MH 01', name: 'Mumbai City', marathi: 'मुंबई शहर', icon: '', tag: 'Gateway of India', aliases: ['mumbai city', 'mumbai', 'greater bombay'], coords: [72.83, 18.96],
+        places: {
+          temples: ['Siddhivinayak Temple', 'Mahalakshmi Temple', 'Mumbadevi Temple', 'Babulnath Temple'],
+          beaches: ['Girgaon Chowpatty', 'Dadar Chowpatty', 'Worli Seaface'],
+          heritage: ['Gateway of India', 'Chhatrapati Shivaji Maharaj Terminus (UNESCO)', 'Mani Bhavan', 'Haji Ali Dargah', 'Kala Ghoda'],
+          hillstation: ['Marine Drive Promenade', 'Hanging Gardens & Malabar Hill']
+        }
+      },
+      {
+        id: 'mumbai_suburban', rto: 'MH 02 / MH 03 / MH 47', name: 'Mumbai Suburban', marathi: 'मुंबई उपनगर', icon: '', tag: 'Kanheri & Juhu Beach', aliases: ['mumbai suburban'], coords: [72.87, 19.12],
+        places: {
+          forts: ['Bandra Fort (Castella de Aguada)', 'Madh Fort', 'Sion Fort'],
+          caves: ['Kanheri Caves', 'Mahakali Caves', 'Jogeshwari Caves'],
+          temples: ['Mount Mary Basilica', 'ISKCON Juhu', 'Global Vipassana Pagoda'],
+          beaches: ['Juhu Beach', 'Versova Beach', 'Aksa Beach', 'Madh Island Beach'],
+          wildlife: ['Sanjay Gandhi National Park (SGNP)', 'Mahim Nature Park'],
+          heritage: ['Gilbert Hill (Monolithic Basalt Column)'],
+          dams: ['Tulsi Lake', 'Vihar Lake', 'Powai Lake']
+        }
+      },
+      {
+        id: 'nagpur', rto: 'MH 31 / MH 40 / MH 49', name: 'Nagpur', marathi: 'नागपूर', icon: '', tag: 'Pench & Deekshabhoomi', aliases: ['nagpur'], coords: [79.08, 21.14],
+        places: {
+          forts: ['Sitabuldi Fort', 'Nagardhan Fort'],
+          temples: ['Ramtek Gad Mandir', 'Koradi Mahalakshmi Temple', 'Adasa Ganpati', 'Dragon Palace Temple'],
+          wildlife: ['Pench National Park', 'Umred-Paoni-Karhandla Wildlife Sanctuary'],
+          heritage: ['Deekshabhoomi', 'Zero Mile Stone', 'Raman Science Centre', 'Futala Lake'],
+          dams: ['Totladoh Dam (Pench)', 'Khindsi Lake', 'Ambazari Dam']
+        }
+      },
+      {
+        id: 'nanded', rto: 'MH 26', name: 'Nanded', marathi: 'नांदेड', icon: '', tag: 'Hazur Sahib & Mahur', aliases: ['nanded'], coords: [77.32, 19.15],
+        places: {
+          forts: ['Kandhar Fort', 'Mahurgad (Ramgad Fort)'],
+          temples: ['Takht Sachkhand Sri Hazur Sahib Gurudwara', 'Renuka Devi Temple (Mahur)', 'Hottal Chalukyan Temples'],
+          wildlife: ['Kinwat Wildlife Sanctuary'],
+          heritage: ['Sikh Heritage Museum & Riverfront Ghats'],
+          dams: ['Vishnupuri Barrage', 'Isapur Dam'],
+          waterfalls: ['Sahastrakund Waterfall']
+        }
+      },
+      {
+        id: 'nandurbar', rto: 'MH 39', name: 'Nandurbar', marathi: 'नंदुरबार', icon: '', tag: 'Toranmal Hills', aliases: ['nandurbar'], coords: [74.24, 21.37],
+        places: {
+          temples: ['Prakasha (Dakshin Kashi Temples)', 'Sarangkheda Datta Temple'],
+          heritage: ['Prakasha Chalcolithic Archaeological Site', 'Sarangkheda Chetak Festival'],
+          hillstation: ['Toranmal Hill Station (Satpura Ranges)', 'Astamba Peak'],
+          dams: ['Sardar Sarovar Backwaters (Dhadgaon)', 'Yashwant Lake'],
+          waterfalls: ['Sita Khai Waterfall (Toranmal)']
+        }
+      },
+      {
+        id: 'nashik', rto: 'MH 15 / MH 41', name: 'Nashik', marathi: 'नाशिक', icon: '', tag: 'Trimbakeshwar & Harihar', aliases: ['nashik', 'nasik'], coords: [73.79, 20.00],
+        places: {
+          forts: ['Harihar Fort', 'Anjaneri', 'Salher (Highest Fort in MH)', 'Mulher', 'Ramshej', 'Tringalwadi'],
+          caves: ['Pandavleni (Trirashmi) Caves', 'Chambhar Leni', 'Anjaneri Caves'],
+          temples: ['Trimbakeshwar (Jyotirlinga)', 'Kalaram Temple', 'Panchavati', 'Saptashrungi (Vani)', 'Muktidham'],
+          wildlife: ['Nandur Madhmeshwar Bird Sanctuary (Ramsar Site)'],
+          heritage: ['Coin Museum (Anjaneri)', 'Gargoti Mineral Museum (Sinnar)', 'Nashik Vineyards'],
+          hillstation: ['Igatpuri', 'Brahmagiri Hills', 'Kasara Ghat'],
+          dams: ['Gangapur Dam', 'Vaitarna Dam', 'Darna Dam', 'Girna Dam'],
+          waterfalls: ['Dudhsagar (Someshwar) Waterfall', 'Vihigaon (Ashoka) Waterfall', 'Bhavali Waterfall']
+        }
+      },
+      {
+        id: 'palghar', rto: 'MH 48', name: 'Palghar', marathi: 'पालघर', icon: '', tag: 'Dabhosa & Kelva Beach', aliases: ['palghar'], coords: [72.77, 19.69],
+        places: {
+          forts: ['Vasai Fort', 'Arnala Fort', 'Kelva Fort', 'Gambhirgad', 'Kaldurg', 'Kohoj Fort'],
+          temples: ['Mahalakshmi Temple (Dahanu)', 'Jivdani Temple (Virar)', 'Vajreshwari Temple'],
+          beaches: ['Kelva Beach', 'Dahanu Beach', 'Bordi Beach', 'Arnala Beach'],
+          wildlife: ['Tungareshwar Wildlife Sanctuary'],
+          heritage: ['Portuguese Ruins of Vasai Fort', 'Warli Tribal Art Heritage'],
+          hillstation: ['Jawhar Hill Station', 'Suryamal'],
+          dams: ['Dhamani Dam', 'Kawadas Dam'],
+          waterfalls: ['Dabhosa Waterfall', 'Kalmandavi Waterfall', 'Palusa Waterfall']
+        }
+      },
+      {
+        id: 'parbhani', rto: 'MH 22', name: 'Parbhani', marathi: 'परभणी', icon: '', tag: 'Jintur Jain Caves', aliases: ['parbhani'], coords: [76.77, 19.26],
+        places: {
+          temples: ['Nemgiri & Chandragiri Jain Temples (Jintur)', 'Mudgaleshwar Temple', 'Pathri Shrine', 'Turabul Haq Dargah'],
+          heritage: ['Ancient Rock-Cut Jain Tirthankara Idols at Jintur'],
+          dams: ['Yeldari Dam', 'Siddheshwar Dam']
+        }
+      },
+      {
+        id: 'pune', rto: 'MH 12 / MH 14 / MH 42', name: 'Pune', marathi: 'पुणे', icon: '', tag: 'Forts, Lonavala & Karla', aliases: ['pune', 'poona'], coords: [73.85, 18.52],
+        places: {
+          forts: ['Sinhagad', 'Rajgad', 'Torna', 'Shivneri', 'Lohagad', 'Visapur', 'Purandar'],
+          caves: ['Karla Caves', 'Bhaja Caves', 'Bedsa Caves', 'Pataleshwar Caves', 'Lenyadri Caves'],
+          temples: ['Bhimashankar (Jyotirlinga)', 'Dagdusheth Halwai Ganpati', 'Jejuri Khandoba', 'Ashtavinayak (Morgaon, Theur, Ozar, Lenyadri, Ranjangaon)'],
+          beaches: ['Panshet & Khadakwasla Lakeside Sandy Shores', 'Nearby Konkan Escape (Alibaug / Kashid via Tamhini Ghat)'],
+          wildlife: ['Bhimashankar Wildlife Sanctuary', 'Bhigwan Bird Sanctuary', 'Mayureshwar Wildlife Sanctuary'],
+          heritage: ['Shaniwar Wada', 'Aga Khan Palace', 'Lal Mahal', 'Vishrambaug Wada'],
+          hillstation: ['Lonavala', 'Khandala', 'Lavasa', 'Tamhini Ghat', 'Malshej Ghat'],
+          dams: ['Khadakwasla', 'Mulshi', 'Pavana', 'Panshet', 'Bhatghar', 'Bhushi Dam'],
+          waterfalls: ['Kune Falls', 'Devkund Waterfall', 'Bhivpuri', 'Kataldhar', 'Madhe Ghat']
+        }
+      },
+      {
+        id: 'raigad', rto: 'MH 06 / MH 46', name: 'Raigad', marathi: 'रायगड', icon: '', tag: 'Raigad Fort & Alibaug', aliases: ['raigad', 'raigarh', 'kolaba'], coords: [73.18, 18.51],
+        places: {
+          forts: ['Raigad Fort', 'Murud-Janjira', 'Kolaba Fort', 'Karnala', 'Sudhagad', 'Sarasgad', 'Korlai', 'Prabalgad'],
+          caves: ['Elephanta Caves (UNESCO)', 'Kuda Caves', 'Thanale Caves', 'Kondana Caves'],
+          temples: ['Ballaleshwar (Pali)', 'Varadvinayak (Mahad)', 'Harihareshwar Temple', 'Birla Mandir (Salav)'],
+          beaches: ['Alibaug', 'Kashid', 'Murud', 'Diveagar', 'Shrivardhan', 'Harihareshwar', 'Nagaon', 'Kihim'],
+          wildlife: ['Karnala Bird Sanctuary', 'Phansad Wildlife Sanctuary'],
+          heritage: ['Chavdar Tale (Mahad)', 'Raigad Coronation Complex'],
+          hillstation: ['Matheran (Vehicle-Free Hill Station)', 'Kolad River Rafting'],
+          dams: ['Bhira Dam', 'Morbe Dam', 'Hetawane Dam'],
+          waterfalls: ['Zenith Waterfall', 'Bhivpuri Falls', 'Dodhani Falls']
+        }
+      },
+      {
+        id: 'ratnagiri', rto: 'MH 08', name: 'Ratnagiri', marathi: 'रत्नागिरी', icon: '', tag: 'Ganpatipule & Guhagar', aliases: ['ratnagiri'], coords: [73.31, 16.99],
+        places: {
+          forts: ['Jaigad', 'Ratnadurg', 'Suvarnadurg', 'Vijaygad', 'Purnagad', 'Gopalgad'],
+          caves: ['Panhalekaji Caves', 'Chiplun Caves'],
+          temples: ['Ganpatipule Temple', 'Parshuram Temple (Chiplun)', 'Velneshwar Temple', 'Marleshwar Temple'],
+          beaches: ['Ganpatipule', 'Guhagar', 'Dapoli (Murud, Ladghar, Karde)', 'Velneshwar', 'Anjarle', 'Mandavi'],
+          heritage: ['Thibaw Palace', 'Lokmanya Tilak Birthplace (Ratnagiri)'],
+          hillstation: ['Dapoli ("Mini Mahabaleshwar")', 'Kumbharli Ghat'],
+          dams: ['Kolkewadi Dam (Koyna Stage-IV)'],
+          waterfalls: ['Marleshwar Waterfall', 'Sawatsada Waterfall']
+        }
+      },
+      {
+        id: 'sangli', rto: 'MH 10', name: 'Sangli', marathi: 'सांगली', icon: '', tag: 'Chandoli & Audumbar', aliases: ['sangli'], coords: [74.57, 16.85],
+        places: {
+          forts: ['Miraj Fort', 'Bhupalgad', 'Machindragad', 'Prachitgad'],
+          caves: ['Dandoba Caves'],
+          temples: ['Audumbar (Datta Temple)', 'Sangli Ganpati Temple', 'Sagareshwar Temple', 'Battis Shirala'],
+          wildlife: ['Chandoli National Park', 'Sagareshwar Wildlife Sanctuary'],
+          heritage: ['Miraj Dargah & Musical Instrument Craft', 'Sangli State Museum'],
+          hillstation: ['Dandoba Hills', 'Shukacharya Hills'],
+          dams: ['Warna (Chandoli) Dam'],
+          waterfalls: ['Chandoli Monsoon Cascades']
+        }
+      },
+      {
+        id: 'satara', rto: 'MH 11 / MH 50', name: 'Satara', marathi: 'सातारा', icon: '', tag: 'Mahabaleshwar & Kaas', aliases: ['satara'], coords: [74.00, 17.68],
+        places: {
+          forts: ['Pratapgad', 'Ajinkyatara', 'Sajjangad', 'Vasota', 'Pandavgad'],
+          caves: ['Wai Caves', 'Pateshwar Caves'],
+          temples: ['Mahabaleshwar Temple', 'Yamai Devi (Aundh)', 'Shikhar Shingnapur', 'Gondavalekar Maharaj Samadhi'],
+          wildlife: ['Koyna Wildlife Sanctuary', 'Sahyadri Tiger Reserve'],
+          heritage: ['Aundh Museum', 'Colonial Heritage of Panchgani & Mahabaleshwar'],
+          hillstation: ['Mahabaleshwar', 'Panchgani', 'Kaas Plateau (UNESCO)', 'Table Land'],
+          dams: ['Koyna Dam', 'Dhom Dam', 'Kanher Dam', 'Urmodi Dam'],
+          waterfalls: ['Thoseghar Waterfall', 'Lingmala Falls', 'Vajrai Waterfall', "Chinaman's Falls"]
+        }
+      },
+      {
+        id: 'sindhudurg', rto: 'MH 07', name: 'Sindhudurg', marathi: 'सिंधुदुर्ग', icon: '', tag: 'Tarkarli & Sea Fort', aliases: ['sindhudurg'], coords: [73.68, 16.05],
+        places: {
+          forts: ['Sindhudurg Fort', 'Vijaydurg Fort', 'Yashwantgad', 'Devgad Fort', 'Nivti Fort'],
+          temples: ['Kunkeshwar Temple', 'Rameshwar Temple (Achara)', 'Bharadi Devi (Anganewadi)'],
+          beaches: ['Tarkarli', 'Malvan', 'Vengurla', 'Devgad', 'Shiroda', 'Bhogwe', 'Nivati'],
+          wildlife: ['Malvan Marine Sanctuary (Scuba & Snorkeling)'],
+          heritage: ['Sawantwadi Royal Palace (Wooden Toys & Ganjifa Art)'],
+          hillstation: ['Amboli Hill Station'],
+          dams: ['Tilari Dam'],
+          waterfalls: ['Amboli Falls', 'Nangartas Falls', 'Savdav Waterfall']
+        }
+      },
+      {
+        id: 'solapur', rto: 'MH 13 / MH 45', name: 'Solapur', marathi: 'सोलापूर', icon: '', tag: 'Pandharpur & Akkalkot', aliases: ['solapur', 'sholapur'], coords: [75.90, 17.66],
+        places: {
+          forts: ['Bhuikot Fort (Solapur)', 'Mangalwedha Fort'],
+          temples: ['Vitthal Rukmini Temple (Pandharpur)', 'Swami Samarth Temple (Akkalkot)', 'Siddheshwar Temple'],
+          wildlife: ['Great Indian Bustard Sanctuary (Nannaj)'],
+          heritage: ['Solapur Bhuikot Fort Ruins & Textile Heritage'],
+          dams: ['Ujjani Dam (Bhima Dam)', 'Ekrukh Lake']
+        }
+      },
+      {
+        id: 'thane', rto: 'MH 04 / MH 05 / MH 43', name: 'Thane', marathi: 'ठाणे', icon: '', tag: 'Tansa & Flamingo Creek', aliases: ['thane'], coords: [73.03, 19.22],
+        places: {
+          forts: ['Gorakhgad', 'Siddhagad', 'Mahuli Fort', 'Malanggad', 'Ghodbunder Fort'],
+          caves: ['Kondeshwar Rock-Cut Caves'],
+          temples: ['Ambarnath Shiv Temple (11th-Century)', 'Titwala Siddhivinayak', 'Kopineshwar Temple'],
+          wildlife: ['Tansa Wildlife Sanctuary', 'Thane Creek Flamingo Sanctuary'],
+          heritage: ['Ghodbunder Portuguese-Maratha Heritage'],
+          hillstation: ['Malshej Ghat (Border)', 'Yeoor Hills'],
+          dams: ['Bhatsa Dam', 'Tansa Dam', 'Barvi Dam'],
+          waterfalls: ['Kondeshwar Waterfall', 'Bhagirath Waterfall']
+        }
+      },
+      {
+        id: 'wardha', rto: 'MH 32', name: 'Wardha', marathi: 'वर्धा', icon: '', tag: 'Sevagram Ashram', aliases: ['wardha'], coords: [78.60, 20.74],
+        places: {
+          temples: ['Gitai Mandir', 'Laxmi Narayan Temple', 'Kelzar Ganpati'],
+          wildlife: ['Bor Tiger Reserve'],
+          heritage: ['Sevagram Ashram (Mahatma Gandhi)', 'Paunar Ashram (Vinoba Bhave)'],
+          dams: ['Bor Dam', 'Lower Wardha Dam']
+        }
+      },
+      {
+        id: 'washim', rto: 'MH 37', name: 'Washim', marathi: 'वाशिम', icon: '', tag: 'Shirpur & Blackbucks', aliases: ['washim'], coords: [77.13, 20.11],
+        places: {
+          temples: ['Antariksh Parshwanath Jain Temple (Shirpur)', 'Balaji Temple (Washim)', 'Poharadevi Spiritual Center'],
+          wildlife: ['Karanja Sohol Blackbuck Sanctuary'],
+          heritage: ['Padma Tirtha & Hemadpanthi Temples']
+        }
+      },
+      {
+        id: 'yavatmal', rto: 'MH 29', name: 'Yavatmal', marathi: 'यवतमाळ', icon: '', tag: 'Tipeshwar Sanctuary', aliases: ['yavatmal', 'yeotmal'], coords: [78.12, 20.39],
+        places: {
+          temples: ['Chintamani Ganesh Temple (Kalamb)', 'Mahadev Temple (Wani)'],
+          wildlife: ['Tipeshwar Wildlife Sanctuary', 'Painganga Wildlife Sanctuary'],
+          dams: ['Bembla Dam', 'Arunavati Dam', 'Pus Dam'],
+          waterfalls: ['Sahastrakund Waterfall (Umarkhed)']
+        }
+      }
+    ];
+
+    const MAHARASHTRA_DISTRICTS = RAW_DISTRICTS
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((d, idx) => ({
+        ...d,
+        index: idx + 1,
+        fillColor: DISTRICT_COLORS[idx % DISTRICT_COLORS.length]
+      }));
+
+    const appState = {
+      selectedDistrictId: null,
+      isLocked: false,
+      selectedCategory: 'all',
+      showIcons: true,
+      showNames: true,
+      fromDistrictId: 'pune',
+      toDistrictId: 'raigad'
+    };
+
+    // -------------------------------------------------------------------------
+    // ALL-DISTRICT DISTANCE & MILES TRACKER (HAVERSINE + SAHYADRI ROAD FACTOR)
+    // -------------------------------------------------------------------------
+    function calculateDistrictDistance(fromId, toId) {
+      const d1 = getDistrict(fromId);
+      const d2 = getDistrict(toId);
+      if (!d1 || !d2 || d1.id === d2.id) {
+        return { miles: 0, km: 0, hours: 0, mins: 0 };
+      }
+      const toRad = deg => (deg * Math.PI) / 180;
+      const [lon1, lat1] = d1.coords;
+      const [lon2, lat2] = d2.coords;
+      const R_KM = 6371;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      // 1.26x road winding factor for Maharashtra highways & ghats
+      const roadKm = Math.max(12, Math.round(R_KM * c * 1.26));
+      const roadMiles = Math.max(7, Math.round(roadKm * 0.621371));
+      const totalMins = Math.round((roadKm / 48) * 60);
+      return {
+        miles: roadMiles,
+        km: roadKm,
+        hours: Math.floor(totalMins / 60),
+        mins: totalMins % 60
+      };
+    }
+
+    function updateMilesTracker(syncDropdowns = true) {
+      const fromSel = document.getElementById('fromDistrictSelect');
+      const toSel = document.getElementById('toDistrictSelect');
+      if (syncDropdowns && fromSel && toSel) {
+        fromSel.value = appState.fromDistrictId;
+        toSel.value = appState.toDistrictId;
+      }
+
+      const { km, hours, mins } = calculateDistrictDistance(appState.fromDistrictId, appState.toDistrictId);
+      const kmEl = document.getElementById('trackerKmVal');
+      const timeEl = document.getElementById('trackerDriveTime');
+      const carRtoEl = document.getElementById('carRtoText');
+
+      if (kmEl) kmEl.textContent = km.toLocaleString();
+      if (timeEl) {
+        timeEl.textContent = km === 0 ? '(Same District)' : `(~${hours}h ${mins}m)`;
+      }
+
+      const fromDist = getDistrict(appState.fromDistrictId);
+      const toDist = getDistrict(appState.toDistrictId);
+      if (carRtoEl && fromDist && fromDist.rto) {
+        carRtoEl.textContent = fromDist.rto.split('/')[0].trim();
+      }
+
+      drawTrackerRouteOnMap();
+    }
+
+    function drawTrackerRouteOnMap() {
+      if (!mapRoot || !projection) return;
+      mapRoot.selectAll('g.safari-tracker-route').remove();
+
+      const d1 = getDistrict(appState.fromDistrictId);
+      const d2 = getDistrict(appState.toDistrictId);
+      if (!d1 || !d2 || d1.id === d2.id) return;
+
+      const p1 = projection(d1.coords);
+      const p2 = projection(d2.coords);
+      if (!p1 || !p2 || isNaN(p1[0]) || isNaN(p2[0])) return;
+
+      const midX = (p1[0] + p2[0]) / 2;
+      const midY = (p1[1] + p2[1]) / 2 - 22;
+
+      const routeG = mapRoot.append('g').attr('class', 'safari-tracker-route').style('pointer-events', 'none');
+      routeG.append('path')
+        .attr('class', 'safari-route-line')
+        .attr('d', `M${p1[0]},${p1[1]} Q${midX},${midY} ${p2[0]},${p2[1]}`);
+
+      routeG.append('circle')
+        .attr('cx', p1[0]).attr('cy', p1[1]).attr('r', 5)
+        .attr('fill', '#10B981').attr('stroke', '#FFFFFF').attr('stroke-width', 1.8);
+
+      routeG.append('circle')
+        .attr('cx', p2[0]).attr('cy', p2[1]).attr('r', 5.5)
+        .attr('fill', '#F59E0B').attr('stroke', '#0F172A').attr('stroke-width', 1.8);
+    }
+
+    function initMilesTrackerDropdowns() {
+      const fromSel = document.getElementById('fromDistrictSelect');
+      const toSel = document.getElementById('toDistrictSelect');
+      if (!fromSel || !toSel) return;
+
+      const optionsHtml = MAHARASHTRA_DISTRICTS.map(d =>
+        `<option value="${d.id}">${d.name} (${d.rto.split('/')[0].trim()})</option>`
+      ).join('');
+
+      fromSel.innerHTML = optionsHtml;
+      toSel.innerHTML = optionsHtml;
+      fromSel.value = appState.fromDistrictId;
+      toSel.value = appState.toDistrictId;
+
+      fromSel.addEventListener('change', (e) => {
+        appState.fromDistrictId = e.target.value;
+        updateMilesTracker(false);
+      });
+
+      toSel.addEventListener('change', (e) => {
+        appState.toDistrictId = e.target.value;
+        updateMilesTracker(false);
+      });
+
+      const swapBtn = document.getElementById('swapDistrictsBtn');
+      if (swapBtn) {
+        swapBtn.addEventListener('click', () => {
+          const temp = appState.fromDistrictId;
+          appState.fromDistrictId = appState.toDistrictId;
+          appState.toDistrictId = temp;
+          updateMilesTracker(true);
+        });
+      }
+
+      updateMilesTracker(true);
+    }
+
+    function getDistrict(id) {
+      return MAHARASHTRA_DISTRICTS.find(d => d.id === id) || MAHARASHTRA_DISTRICTS[0];
+    }
+
+    function normalizeStr(s) {
+      return (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    function matchDistrictByName(rawName) {
+      const norm = normalizeStr(rawName);
+      if (!norm) return null;
+      if (norm.includes('sambhaji') || norm.includes('aurangabad')) {
+        return MAHARASHTRA_DISTRICTS.find(d => d.id === 'chhatrapati_sambhajinagar') || null;
+      }
+      // Direct or alias exact match first
+      const exact = MAHARASHTRA_DISTRICTS.find(d =>
+        normalizeStr(d.name) === norm || (d.aliases || []).some(a => normalizeStr(a) === norm)
+      );
+      if (exact) return exact;
+      // Partial fallback match across both name and aliases
+      return MAHARASHTRA_DISTRICTS.find(d =>
+        norm.includes(normalizeStr(d.name)) ||
+        normalizeStr(d.name).includes(norm) ||
+        (d.aliases || []).some(a => {
+          const normAlias = normalizeStr(a);
+          return normAlias.length >= 4 && (norm.includes(normAlias) || normAlias.includes(norm));
+        })
+      ) || null;
+    }
+
+    // -------------------------------------------------------------------------
+    // FIXED CARTOGRAPHIC MAP ENGINE (NO ZOOM / PAN, ALL NAMES & CLICK SELECT)
+    // -------------------------------------------------------------------------
+    let svgEl, mapRoot, projection;
+
+    function updateLabelPlacement() {
+      if (!mapRoot) return;
+      mapRoot.selectAll('text.district-label')
+        .attr('dy', appState.showIcons ? '8px' : '2px');
+
+      mapRoot.selectAll('text.district-famous-icon')
+        .attr('dy', '-4px');
+    }
+
+    function renderBaseCartography(width, height) {
+      if (!projection) return;
+      const gridG = mapRoot.append('g').style('pointer-events', 'none');
+      const [sx, sy] = projection([72.25, 17.65]);
+      gridG.append('text')
+        .attr('x', sx).attr('y', sy)
+        .attr('transform', `rotate(-72, ${sx}, ${sy})`)
+        .attr('fill', '#64748B').attr('opacity', 0.65)
+        .attr('font-size', '11px').attr('font-weight', '800').attr('letter-spacing', '4px')
+        .attr('text-anchor', 'middle').text('ARABIAN SEA');
+
+      // Render National Highways (NH 48, NH 52, NH 60, NH 160)
+      const highways = [
+        { code: 'NH 48', pts: [[72.85, 18.96], [73.20, 18.65], [73.85, 18.52], [74.02, 17.68], [74.24, 16.70], [74.57, 16.85]] }, // Mumbai - Pune - Kolhapur
+        { code: 'NH 160', pts: [[72.85, 19.12], [73.03, 19.22], [73.79, 20.00], [74.74, 19.09], [75.34, 19.88]] }, // Mumbai - Nashik - Sambhajinagar
+        { code: 'NH 60', pts: [[73.79, 20.00], [74.00, 18.52], [75.00, 18.00]] }, // Nashik - Pune - Solapur
+        { code: 'NH 52', pts: [[74.74, 19.09], [75.34, 19.88], [75.90, 17.66], [76.04, 18.18]] } // Northern to Southern MH Axis
+      ];
+
+      const lineGen = d3.line()
+        .x(d => projection(d)[0])
+        .y(d => projection(d)[1])
+        .curve(d3.curveNatural);
+
+      const nhGroup = gridG.append('g').attr('class', 'national-highways');
+      highways.forEach(hw => {
+        const coords = hw.pts.map(pt => projection(pt));
+        if (coords.some(c => isNaN(c[0]) || isNaN(c[1]))) return;
+
+        nhGroup.append('path')
+          .datum(hw.pts)
+          .attr('class', 'nh-highway-line')
+          .attr('d', lineGen);
+
+        // Highway Shield Marker at midpoint
+        const midPt = coords[Math.floor(coords.length / 2)];
+        if (midPt) {
+          nhGroup.append('rect')
+            .attr('x', midPt[0] - 14)
+            .attr('y', midPt[1] - 7)
+            .attr('width', 28)
+            .attr('height', 14)
+            .attr('rx', 3)
+            .attr('fill', '#DC2626')
+            .attr('stroke', '#FFFFFF')
+            .attr('stroke-width', 1);
+
+          nhGroup.append('text')
+            .attr('x', midPt[0])
+            .attr('y', midPt[1] + 2.5)
+            .attr('class', 'nh-shield')
+            .text(hw.code);
+        }
+      });
+    }
+
+    function initMaharashtraMap() {
+      const container = document.getElementById('mapContainer');
+      const width = Math.max(320, container.clientWidth || 900);
+      const height = Math.max(500, container.clientHeight || 700);
+
+      svgEl = d3.select('#maharashtraSvg')
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+
+      svgEl.selectAll('*').remove();
+      mapRoot = svgEl.append('g');
+
+      // Instant fixed geographic Voronoi clipped inside 66-point Maharashtra state polygon
+      renderVoronoiMap(width, height);
+      updateMapStyling();
+      updateLabelPlacement();
+
+      // Upgrade seamlessly to exact administrative TopoJSON boundaries if reachable
+      upgradeToExactTopoJson(width, height);
+    }
+
+    function renderVoronoiMap(width, height) {
+      const mhBoundary = [
+        [72.64, 20.14], [72.72, 20.32], [72.82, 20.52], [73.02, 20.72],
+        [73.24, 20.94], [73.46, 21.18], [73.65, 21.45], [73.82, 21.74],
+        [74.12, 21.98], [74.45, 22.03], [74.78, 21.84], [75.08, 21.64],
+        [75.42, 21.48], [75.78, 21.38], [76.15, 21.38], [76.52, 21.48],
+        [76.88, 21.64], [77.25, 21.75], [77.62, 21.68], [78.02, 21.58],
+        [78.45, 21.52], [78.88, 21.60], [79.32, 21.64], [79.75, 21.58],
+        [80.18, 21.48], [80.56, 21.36], [80.78, 21.05], [80.86, 20.68],
+        [80.80, 20.28], [80.84, 19.88], [80.88, 19.48], [80.65, 19.16],
+        [80.32, 18.88], [80.00, 18.72], [79.72, 18.82], [79.42, 18.98],
+        [79.10, 19.16], [78.75, 19.34], [78.40, 19.48], [78.05, 19.62],
+        [77.82, 19.35], [77.68, 18.95], [77.52, 18.55], [77.25, 18.30],
+        [76.92, 18.02], [76.58, 17.78], [76.22, 17.54], [75.85, 17.32],
+        [75.48, 17.12], [75.10, 16.94], [74.75, 16.66], [74.42, 16.34],
+        [74.12, 16.02], [73.85, 15.80], [73.66, 15.72], [73.50, 15.96],
+        [73.38, 16.32], [73.30, 16.76], [73.18, 17.22], [73.05, 17.68],
+        [72.95, 18.15], [72.86, 18.62], [72.78, 19.04], [72.74, 19.42],
+        [72.68, 19.78], [72.64, 20.14]
+      ];
+
+      const boundaryGeo = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [mhBoundary] } };
+      // Optimized fit for a larger, bolder map view with inward popup clearance
+      const rightReserve = window.innerWidth >= 1024 ? Math.min(600, Math.round(width * 0.44)) : 15;
+      projection = d3.geoMercator().fitExtent([[12, 10], [Math.max(320, width - rightReserve), height - 20]], boundaryGeo);
+      const pathGen = d3.geoPath().projection(projection);
+
+      renderBaseCartography(width, height);
+
+      const defs = svgEl.append('defs');
+      defs.append('clipPath').attr('id', 'mh-clip-boundary').append('path').attr('d', pathGen(boundaryGeo));
+
+      // Subtle 3D Relief Drop Shadow under Maharashtra
+      mapRoot.append('path')
+        .attr('d', pathGen(boundaryGeo))
+        .attr('fill', '#94A3B8')
+        .attr('opacity', 0.45)
+        .attr('transform', 'translate(4, 5)')
+        .style('pointer-events', 'none');
+
+      const points = MAHARASHTRA_DISTRICTS.map(d => projection(d.coords));
+      const delaunay = d3.Delaunay.from(points);
+      const voronoi = delaunay.voronoi([0, 0, width, height]);
+
+      const clippedGroup = mapRoot.append('g').attr('clip-path', 'url(#mh-clip-boundary)');
+
+      clippedGroup.selectAll('path.district-path')
+        .data(MAHARASHTRA_DISTRICTS)
+        .enter()
+        .append('path')
+        .attr('class', 'district-path')
+        .attr('data-district-id', d => d.id)
+        .attr('d', (d, i) => voronoi.renderCell(i))
+        .attr('fill', d => d.fillColor)
+        .on('click', function (event, d) {
+          event.stopPropagation();
+          appState.isLocked = true;
+          renderDistrictPlacesList(d.id, true, true, true);
+        });
+
+      // Crisp State Outline
+      mapRoot.append('path')
+        .attr('d', pathGen(boundaryGeo))
+        .attr('fill', 'none')
+        .attr('stroke', '#0B192C')
+        .attr('stroke-width', 2.2)
+        .attr('vector-effect', 'non-scaling-stroke')
+        .style('pointer-events', 'none');
+
+      // District Icons & Full Names
+      mapRoot.selectAll('text.district-famous-icon')
+        .data(MAHARASHTRA_DISTRICTS)
+        .enter()
+        .append('text')
+        .attr('class', 'district-famous-icon')
+        .attr('x', (d, i) => points[i][0])
+        .attr('y', (d, i) => points[i][1])
+        .text(d => '');
+
+      mapRoot.selectAll('text.district-label')
+        .data(MAHARASHTRA_DISTRICTS)
+        .enter()
+        .append('text')
+        .attr('class', 'district-label')
+        .attr('x', (d, i) => points[i][0])
+        .attr('y', (d, i) => points[i][1])
+        .text(d => d.name);
+    }
+
+    async function upgradeToExactTopoJson(width, height) {
+      const urls = [
+        { type: 'topo', url: 'https://raw.githubusercontent.com/shuklaneerajdev/IndiaStateTopojsonFiles/master/Maharashtra.topojson' },
+        { type: 'topo', url: 'https://raw.githubusercontent.com/udit-001/india-maps-data/main/topojson/states/maharashtra.json' }
+      ];
+
+      for (const src of urls) {
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 5000);
+          const res = await fetch(src.url, { signal: controller.signal });
+          clearTimeout(timer);
+          if (!res.ok) continue;
+
+          const data = await res.json();
+          let geo = null;
+          if (src.type === 'topo' && data.objects) {
+            const objKey = Object.keys(data.objects)[0];
+            geo = topojson.feature(data, data.objects[objKey]);
+          } else if (data.features) {
+            geo = data;
+          }
+
+          if (geo && geo.features && geo.features.length >= 30) {
+            const features = geo.features;
+            const rightReserve = window.innerWidth >= 1024 ? Math.min(600, Math.round(width * 0.44)) : 15;
+            projection = d3.geoMercator().fitExtent([[12, 10], [Math.max(320, width - rightReserve), height - 20]], geo);
+            const pathGen = d3.geoPath().projection(projection);
+
+            mapRoot.selectAll('*').remove();
+            renderBaseCartography(width, height);
+
+            // Subtle 3D Relief Drop Shadow under Maharashtra
+            mapRoot.append('path')
+              .attr('d', pathGen(geo))
+              .attr('fill', '#94A3B8')
+              .attr('opacity', 0.45)
+              .attr('transform', 'translate(4, 5)')
+              .style('pointer-events', 'none');
+
+            const enriched = features.map((f, idx) => {
+              const p = f.properties || {};
+              const candidateProps = [p.NAME_2, p.district, p.DISTRICT, p.dtname, p.DIST_NAME, p.Name, p.name];
+              let district = null;
+              let rawName = '';
+              for (const val of candidateProps) {
+                if (typeof val === 'string' && val.trim()) {
+                  if (!rawName) rawName = val.trim();
+                  const matched = matchDistrictByName(val);
+                  if (matched) {
+                    district = matched;
+                    break;
+                  }
+                }
+              }
+              // Coordinate proximity fallback so every TopoJSON polygon gets its exact district color & name
+              if (!district) {
+                const c = d3.geoCentroid(f);
+                if (c && !isNaN(c[0]) && !isNaN(c[1])) {
+                  let minDist = Infinity;
+                  MAHARASHTRA_DISTRICTS.forEach(d => {
+                    const distSq = Math.pow(d.coords[0] - c[0], 2) + Math.pow(d.coords[1] - c[1], 2);
+                    if (distSq < minDist) {
+                      minDist = distSq;
+                      district = d;
+                    }
+                  });
+                }
+              }
+              const fallbackColor = DISTRICT_COLORS[idx % DISTRICT_COLORS.length];
+              return { feature: f, district, fallbackColor, rawName };
+            });
+
+            mapRoot.selectAll('path.district-path')
+              .data(enriched)
+              .enter()
+              .append('path')
+              .attr('class', 'district-path')
+              .attr('data-district-id', d => d.district ? d.district.id : '')
+              .attr('d', d => pathGen(d.feature))
+              .attr('fill', d => d.district ? d.district.fillColor : d.fallbackColor)
+              .on('click', function (event, d) {
+                event.stopPropagation();
+                if (!d.district) return;
+                appState.isLocked = true;
+                renderDistrictPlacesList(d.district.id, true, true, true);
+              });
+
+            // Group polygons per district and place the icon & name at the largest polygon's centroid
+            const byDistrict = new Map();
+            enriched.forEach(d => {
+              if (!d.district) return;
+              const area = d3.geoArea(d.feature);
+              const existing = byDistrict.get(d.district.id);
+              if (!existing || area > existing.area) {
+                const c = pathGen.centroid(d.feature);
+                if (!isNaN(c[0]) && !isNaN(c[1])) {
+                  byDistrict.set(d.district.id, { district: d.district, x: c[0], y: c[1], area });
+                }
+              }
+            });
+            const centroids = Array.from(byDistrict.values());
+
+            mapRoot.selectAll('text.district-famous-icon')
+              .data(centroids)
+              .enter()
+              .append('text')
+              .attr('class', 'district-famous-icon')
+              .attr('x', d => d.x)
+              .attr('y', d => d.y)
+              .text(d => '');
+
+            mapRoot.selectAll('text.district-label')
+              .data(centroids)
+              .enter()
+              .append('text')
+              .attr('class', 'district-label')
+              .attr('x', d => d.x)
+              .attr('y', d => d.y)
+              .text(d => d.district.name);
+
+            updateMapStyling();
+            updateLabelPlacement();
+            drawTrackerRouteOnMap();
+            break;
+          }
+        } catch (err) {
+          // Keep instant Voronoi map seamlessly
+        }
+      }
+      drawTrackerRouteOnMap();
+    }
+
+    function updateMapStyling() {
+      if (!mapRoot) return;
+      if (svgEl) {
+        svgEl.classed('selection-locked', appState.isLocked);
+      }
+      const cat = appState.selectedCategory;
+      const isFiltering = cat !== 'all';
+
+      const matchingIds = new Set();
+      MAHARASHTRA_DISTRICTS.forEach(d => {
+        if (!isFiltering || (d.places[cat] && d.places[cat].length > 0)) {
+          matchingIds.add(d.id);
+        }
+      });
+
+      mapRoot.selectAll('path.district-path')
+        .classed('active-selected', function () {
+          return this.getAttribute('data-district-id') === appState.selectedDistrictId;
+        })
+        .classed('dimmed', function () {
+          return isFiltering && !matchingIds.has(this.getAttribute('data-district-id'));
+        });
+
+      mapRoot.selectAll('path.district-path.active-selected').raise();
+      mapRoot.selectAll('text.district-famous-icon').raise();
+      mapRoot.selectAll('text.district-label').raise();
+
+      mapRoot.selectAll('text.district-famous-icon')
+        .style('opacity', d => {
+          if (!appState.showIcons) return 0;
+          const id = d.district ? d.district.id : d.id;
+          return isFiltering && !matchingIds.has(id) ? 0.2 : 1;
+        });
+
+      mapRoot.selectAll('text.district-label')
+        .style('opacity', d => {
+          if (!appState.showNames) return 0;
+          const id = d.district ? d.district.id : d.id;
+          return isFiltering && !matchingIds.has(id) ? 0.2 : 1;
+        });
+
+      const badge = document.getElementById('activeCategoryBadge');
+      if (isFiltering) {
+        const catObj = PLACE_CATEGORIES.find(c => c.key === cat);
+        badge.textContent = `Theme: ${catObj ? catObj.label : cat} (${matchingIds.size} Districts)`;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // RENDER RIGHT-SIDE DISTRICT PLACES POPUP
+    // -------------------------------------------------------------------------
+    function closeDistrictPopup() {
+      const panelEl = document.getElementById('districtPlacesPanel');
+      if (panelEl) panelEl.classList.add('hidden');
+      appState.selectedDistrictId = null;
+      appState.isLocked = false;
+      updateMapStyling();
+    }
+
+    function renderDistrictPlacesList(districtId, animatePanel = true, openPopup = true, lockSelection = false) {
+      if (!districtId) return;
+      // Prevent hover events from overriding an already clicked/locked district
+      if (appState.isLocked && !lockSelection && appState.selectedDistrictId && appState.selectedDistrictId !== districtId) {
+        return;
+      }
+      const district = getDistrict(districtId);
+      if (!district) return;
+
+      appState.selectedDistrictId = district.id;
+      if (lockSelection) {
+        appState.isLocked = true;
+        // Automatically set clicked district as destination in the From -> To Miles Tracker
+        if (appState.fromDistrictId !== district.id) {
+          appState.toDistrictId = district.id;
+          updateMilesTracker(true);
+        }
+      }
+
+      updateMapStyling();
+
+      const panelEl = document.getElementById('districtPlacesPanel');
+      const rtoEl = document.getElementById('panelRtoCode');
+      const enEl = document.getElementById('panelDistrictEn');
+      const mrEl = document.getElementById('panelDistrictMr');
+      const tagEl = document.getElementById('panelDistrictTag');
+      const bodyEl = document.getElementById('panelPlacesBody');
+
+      if (!panelEl || !bodyEl) return;
+
+      if (rtoEl) rtoEl.textContent = district.rto;
+      if (enEl) enEl.textContent = district.name;
+      if (mrEl) mrEl.textContent = district.marathi;
+      if (tagEl) tagEl.textContent = district.tag;
+
+      const cardsHtml = PLACE_CATEGORIES.map(cat => {
+        const items = (district.places && district.places[cat.key]) || [];
+        if (items.length === 0) return '';
+        return `
+          <div class="rounded-2xl bg-white/95 border border-slate-200/90 p-3.5 shadow-xs hover:shadow-md transition">
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+                <span class="text-[11px] font-black uppercase tracking-wider text-slate-800 truncate">${cat.label}</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-black border ${cat.badge} shrink-0">${items.length}</span>
+            </div>
+            <p class="text-xs font-medium text-slate-600 leading-relaxed">${items.join(', ')}</p>
+          </div>
+        `;
+      }).filter(Boolean).join('');
+
+      bodyEl.innerHTML = cardsHtml || `
+        <div class="col-span-full text-center py-6 text-sm font-semibold text-slate-500">
+          Explore scenic trails &amp; local heritage across ${district.name}.
+        </div>
+      `;
+
+      if (openPopup) {
+        panelEl.classList.remove('hidden');
+        if (animatePanel) {
+          panelEl.classList.remove('middle-right-flash');
+          void panelEl.offsetWidth;
+          panelEl.classList.add('middle-right-flash');
+        }
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // INITIALIZE CONTROLS & EVENT LISTENERS
+    // -------------------------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', () => {
+      // Close Right-Side Info Popup (Header ✕, Backdrop Click, or Esc key)
+      const closeOverlayBtn = document.getElementById('closePlacesOverlayBtn');
+      if (closeOverlayBtn) {
+        closeOverlayBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeDistrictPopup();
+        });
+      }
+
+      document.getElementById('maharashtraSvg').addEventListener('click', (e) => {
+        // Only close when clicking empty background SVG space, never when clicking a district path
+        if (!e.target.closest('.district-path')) {
+          closeDistrictPopup();
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeDistrictPopup();
+      });
+      // Initialize Miles Tracker & Map
+      initMilesTrackerDropdowns();
+      initMaharashtraMap();
+
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => initMaharashtraMap(), 250);
+      });
+    });
+  </script>
+</body>
+</html>
