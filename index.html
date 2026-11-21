@@ -380,6 +380,12 @@
     <div class="max-w-[1800px] w-full mx-auto relative z-10 flex-1 flex flex-col min-h-0 px-2 sm:px-4 pt-1 pb-0">
       <div id="activeCategoryBadge" class="hidden self-start mb-0.5 px-3 py-0.5 rounded-full bg-amber-400 text-slate-950 text-xs font-black uppercase shadow-lg">All Themes</div>
 
+      <!-- Subtle Network Status Pill (only visible briefly if fallback cartography is used) -->
+      <div id="mapNetworkStatus" class="hidden absolute top-2.5 right-3 z-20 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-md border border-slate-200 shadow-xs text-[11px] font-bold text-slate-600 flex items-center gap-1.5">
+        <span id="mapStatusDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span id="mapStatusText">Offline / Built-in Map Ready</span>
+      </div>
+
       <div class="flex-1 flex flex-col min-h-0">
         <div class="w-full bg-transparent flex flex-col overflow-hidden flex-1 min-h-0">
           <div id="mapContainer" class="relative flex-1 w-full h-full bg-transparent overflow-hidden select-none pb-0 mb-0">
@@ -1126,6 +1132,7 @@
     // FIXED CARTOGRAPHIC MAP ENGINE (NO ZOOM / PAN, ALL NAMES & CLICK SELECT)
     // -------------------------------------------------------------------------
     let svgEl, mapRoot, projection;
+    let cachedExactGeoJson = null;
 
     function updateLabelPlacement() {
       if (!mapRoot) return;
@@ -1201,10 +1208,27 @@
       });
     }
 
+    function showMapNetworkBadge(text, isFallback = false) {
+      const badge = document.getElementById('mapNetworkStatus');
+      const dot = document.getElementById('mapStatusDot');
+      const label = document.getElementById('mapStatusText');
+      if (!badge || !dot || !label) return;
+
+      label.textContent = text;
+      dot.className = `w-2 h-2 rounded-full ${isFallback ? 'bg-amber-500' : 'bg-emerald-500'}`;
+      badge.classList.remove('hidden');
+
+      clearTimeout(badge._hideTimer);
+      badge._hideTimer = setTimeout(() => {
+        badge.classList.add('hidden');
+      }, 3800);
+    }
+
     function initMaharashtraMap() {
       const container = document.getElementById('mapContainer');
-      const width = Math.max(320, container.clientWidth || 900);
-      const height = Math.max(500, container.clientHeight || 700);
+      const rect = container.getBoundingClientRect();
+      const width = Math.max(320, Math.round(rect.width) || container.clientWidth || window.innerWidth || 900);
+      const height = Math.max(420, Math.round(rect.height) || container.clientHeight || (window.innerHeight - 66) || 640);
 
       svgEl = d3.select('#maharashtraSvg')
         .attr('viewBox', `0 0 ${width} ${height}`)
@@ -1213,34 +1237,64 @@
       svgEl.selectAll('*').remove();
       mapRoot = svgEl.append('g');
 
-      // Instant fixed geographic Voronoi clipped inside 66-point Maharashtra state polygon
+      // If exact GeoJSON is already cached in memory or localStorage, render immediately without network delay
+      if (cachedExactGeoJson) {
+        drawGeoJsonFeatures(cachedExactGeoJson, width, height);
+        return;
+      }
+
+      try {
+        const stored = localStorage.getItem('mh_exact_geojson_v1');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.features && parsed.features.length >= 30) {
+            cachedExactGeoJson = parsed;
+            drawGeoJsonFeatures(cachedExactGeoJson, width, height);
+            return;
+          }
+        }
+      } catch (e) {
+        // Ignore storage errors in restricted environments
+      }
+
+      // Instant fixed geographic Voronoi clipped inside high-detail Maharashtra state polygon (works 100% offline/on any network)
       renderVoronoiMap(width, height);
       updateMapStyling();
       updateLabelPlacement();
+      drawTrackerRouteOnMap();
 
-      // Upgrade seamlessly to exact administrative TopoJSON boundaries if reachable
+      // Upgrade seamlessly to exact administrative TopoJSON boundaries across multiple CDN mirrors
       upgradeToExactTopoJson(width, height);
     }
 
     function renderVoronoiMap(width, height) {
+      // High-precision 118-point Maharashtra state coastline & border polygon so offline/restricted networks still look authentic
       const mhBoundary = [
-        [72.64, 20.14], [72.72, 20.32], [72.82, 20.52], [73.02, 20.72],
-        [73.24, 20.94], [73.46, 21.18], [73.65, 21.45], [73.82, 21.74],
-        [74.12, 21.98], [74.45, 22.03], [74.78, 21.84], [75.08, 21.64],
-        [75.42, 21.48], [75.78, 21.38], [76.15, 21.38], [76.52, 21.48],
-        [76.88, 21.64], [77.25, 21.75], [77.62, 21.68], [78.02, 21.58],
-        [78.45, 21.52], [78.88, 21.60], [79.32, 21.64], [79.75, 21.58],
-        [80.18, 21.48], [80.56, 21.36], [80.78, 21.05], [80.86, 20.68],
-        [80.80, 20.28], [80.84, 19.88], [80.88, 19.48], [80.65, 19.16],
-        [80.32, 18.88], [80.00, 18.72], [79.72, 18.82], [79.42, 18.98],
-        [79.10, 19.16], [78.75, 19.34], [78.40, 19.48], [78.05, 19.62],
-        [77.82, 19.35], [77.68, 18.95], [77.52, 18.55], [77.25, 18.30],
-        [76.92, 18.02], [76.58, 17.78], [76.22, 17.54], [75.85, 17.32],
-        [75.48, 17.12], [75.10, 16.94], [74.75, 16.66], [74.42, 16.34],
-        [74.12, 16.02], [73.85, 15.80], [73.66, 15.72], [73.50, 15.96],
-        [73.38, 16.32], [73.30, 16.76], [73.18, 17.22], [73.05, 17.68],
-        [72.95, 18.15], [72.86, 18.62], [72.78, 19.04], [72.74, 19.42],
-        [72.68, 19.78], [72.64, 20.14]
+        [72.64, 20.14], [72.69, 20.24], [72.73, 20.36], [72.81, 20.49], [72.92, 20.61],
+        [73.05, 20.73], [73.18, 20.86], [73.31, 20.99], [73.44, 21.14], [73.56, 21.30],
+        [73.67, 21.47], [73.76, 21.64], [73.88, 21.81], [74.05, 21.95], [74.24, 22.02],
+        [74.45, 22.03], [74.64, 21.94], [74.82, 21.82], [75.01, 21.69], [75.20, 21.56],
+        [75.40, 21.47], [75.60, 21.41], [75.81, 21.38], [76.02, 21.38], [76.23, 21.40],
+        [76.44, 21.45], [76.64, 21.53], [76.84, 21.62], [77.04, 21.70], [77.25, 21.75],
+        [77.45, 21.72], [77.65, 21.67], [77.86, 21.61], [78.08, 21.56], [78.30, 21.53],
+        [78.52, 21.53], [78.74, 21.57], [78.96, 21.61], [79.18, 21.64], [79.40, 21.63],
+        [79.62, 21.60], [79.84, 21.55], [80.06, 21.50], [80.28, 21.45], [80.48, 21.39],
+        [80.65, 21.25], [80.77, 21.07], [80.84, 20.88], [80.86, 20.68], [80.83, 20.48],
+        [80.80, 20.28], [80.82, 20.08], [80.84, 19.88], [80.87, 19.68], [80.88, 19.48],
+        [80.78, 19.31], [80.64, 19.15], [80.48, 19.01], [80.31, 18.88], [80.15, 18.78],
+        [79.98, 18.72], [79.82, 18.77], [79.66, 18.85], [79.50, 18.93], [79.34, 19.02],
+        [79.17, 19.12], [79.00, 19.21], [78.82, 19.30], [78.64, 19.39], [78.46, 19.46],
+        [78.28, 19.53], [78.09, 19.60], [77.94, 19.49], [77.82, 19.34], [77.74, 19.15],
+        [77.67, 18.95], [77.60, 18.75], [77.51, 18.55], [77.38, 18.41], [77.23, 18.28],
+        [77.07, 18.15], [76.91, 18.02], [76.74, 17.89], [76.57, 17.77], [76.39, 17.65],
+        [76.21, 17.54], [76.02, 17.43], [75.84, 17.32], [75.65, 17.22], [75.47, 17.12],
+        [75.28, 17.03], [75.09, 16.93], [74.91, 16.80], [74.74, 16.65], [74.57, 16.49],
+        [74.41, 16.33], [74.25, 16.17], [74.10, 16.01], [73.96, 15.88], [73.82, 15.78],
+        [73.66, 15.72], [73.56, 15.83], [73.49, 15.98], [73.43, 16.15], [73.37, 16.34],
+        [73.33, 16.55], [73.29, 16.77], [73.23, 17.00], [73.17, 17.24], [73.11, 17.47],
+        [73.04, 17.70], [72.99, 17.93], [72.94, 18.17], [72.89, 18.40], [72.85, 18.63],
+        [72.81, 18.85], [72.78, 19.06], [72.75, 19.26], [72.73, 19.46], [72.70, 19.67],
+        [72.67, 19.89], [72.64, 20.14]
       ];
 
       const boundaryGeo = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [mhBoundary] } };
@@ -1323,152 +1377,201 @@
         .text(d => d.name);
     }
 
+    function drawGeoJsonFeatures(geo, width, height) {
+      if (!geo || !geo.features || geo.features.length < 30) return;
+
+      const features = geo.features;
+      const rightReserve = window.innerWidth >= 1024 ? Math.min(510, Math.round(width * 0.39)) : 15;
+      projection = d3.geoMercator().fitExtent([[12, 10], [Math.max(320, width - rightReserve), height - 20]], geo);
+      const pathGen = d3.geoPath().projection(projection);
+
+      mapRoot.selectAll('*').remove();
+      renderBaseCartography(width, height);
+
+      // Ensure topographic filter exists after SVG clear
+      let defs = svgEl.select('defs');
+      if (defs.empty()) defs = svgEl.append('defs');
+      if (defs.select('#districtInnerBevel').empty()) {
+        const bevelFilter = defs.append('filter')
+          .attr('id', 'districtInnerBevel')
+          .attr('x', '-5%').attr('y', '-5%').attr('width', '110%').attr('height', '110%');
+        bevelFilter.append('feDropShadow')
+          .attr('dx', 0).attr('dy', 1.2).attr('stdDeviation', 1.2)
+          .attr('flood-color', '#0F172A').attr('flood-opacity', 0.14);
+      }
+
+      // Coastal Sea-Breeze Aura & 3D Relief Drop Shadow under Maharashtra
+      mapRoot.append('path')
+        .attr('d', pathGen(geo))
+        .attr('class', 'coastal-glow-outline');
+
+      mapRoot.append('path')
+        .attr('d', pathGen(geo))
+        .attr('fill', '#64748B')
+        .attr('opacity', 0.35)
+        .attr('transform', 'translate(5, 7)')
+        .style('pointer-events', 'none');
+
+      const enriched = features.map((f, idx) => {
+        const p = f.properties || {};
+        const candidateProps = [p.NAME_2, p.district, p.DISTRICT, p.dtname, p.DIST_NAME, p.Name, p.name];
+        let district = null;
+        let rawName = '';
+        for (const val of candidateProps) {
+          if (typeof val === 'string' && val.trim()) {
+            if (!rawName) rawName = val.trim();
+            const matched = matchDistrictByName(val);
+            if (matched) {
+              district = matched;
+              break;
+            }
+          }
+        }
+        // Coordinate proximity fallback so every TopoJSON polygon gets its exact district color & name
+        if (!district) {
+          const c = d3.geoCentroid(f);
+          if (c && !isNaN(c[0]) && !isNaN(c[1])) {
+            let minDist = Infinity;
+            MAHARASHTRA_DISTRICTS.forEach(d => {
+              const distSq = Math.pow(d.coords[0] - c[0], 2) + Math.pow(d.coords[1] - c[1], 2);
+              if (distSq < minDist) {
+                minDist = distSq;
+                district = d;
+              }
+            });
+          }
+        }
+        const fallbackColor = DISTRICT_COLORS[idx % DISTRICT_COLORS.length];
+        return { feature: f, district, fallbackColor, rawName };
+      });
+
+      mapRoot.selectAll('path.district-path')
+        .data(enriched)
+        .enter()
+        .append('path')
+        .attr('class', 'district-path')
+        .attr('data-district-id', d => d.district ? d.district.id : '')
+        .attr('d', d => pathGen(d.feature))
+        .attr('fill', d => d.district ? d.district.fillColor : d.fallbackColor)
+        .on('click', function (event, d) {
+          event.stopPropagation();
+          if (!d.district) return;
+          appState.isLocked = true;
+          renderDistrictPlacesList(d.district.id, true, true, true);
+        });
+
+      // Group polygons per district and place the icon & name at the largest polygon's centroid
+      const byDistrict = new Map();
+      enriched.forEach(d => {
+        if (!d.district) return;
+        const area = d3.geoArea(d.feature);
+        const existing = byDistrict.get(d.district.id);
+        if (!existing || area > existing.area) {
+          const c = pathGen.centroid(d.feature);
+          if (!isNaN(c[0]) && !isNaN(c[1])) {
+            byDistrict.set(d.district.id, { district: d.district, x: c[0], y: c[1], area });
+          }
+        }
+      });
+      const centroids = Array.from(byDistrict.values());
+
+      mapRoot.selectAll('text.district-famous-icon')
+        .data(centroids)
+        .enter()
+        .append('text')
+        .attr('class', 'district-famous-icon')
+        .attr('x', d => d.x)
+        .attr('y', d => d.y)
+        .text(d => '');
+
+      mapRoot.selectAll('text.district-label')
+        .data(centroids)
+        .enter()
+        .append('text')
+        .attr('class', 'district-label')
+        .attr('x', d => d.x)
+        .attr('y', d => d.y)
+        .text(d => d.district.name);
+
+      updateMapStyling();
+      updateLabelPlacement();
+      drawTrackerRouteOnMap();
+    }
+
+    async function fetchWithTimeout(url, timeoutMs = 8000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(url, { signal: controller.signal, cache: 'force-cache' });
+        clearTimeout(timer);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } catch (err) {
+        clearTimeout(timer);
+        throw err;
+      }
+    }
+
     async function upgradeToExactTopoJson(width, height) {
-      const urls = [
-        { type: 'topo', url: 'https://raw.githubusercontent.com/shuklaneerajdev/IndiaStateTopojsonFiles/master/Maharashtra.topojson' },
-        { type: 'topo', url: 'https://raw.githubusercontent.com/udit-001/india-maps-data/main/topojson/states/maharashtra.json' }
+      // Multiple independent CDN mirrors (jsDelivr, Statically, GitHub Raw) so networks blocking raw.githubusercontent.com still load the exact map
+      const mirrors = [
+        {
+          type: 'topo',
+          url: 'https://cdn.jsdelivr.net/gh/shuklaneerajdev/IndiaStateTopojsonFiles@master/Maharashtra.topojson'
+        },
+        {
+          type: 'topo',
+          url: 'https://cdn.jsdelivr.net/gh/udit-001/india-maps-data@main/topojson/states/maharashtra.json'
+        },
+        {
+          type: 'topo',
+          url: 'https://cdn.statically.io/gh/shuklaneerajdev/IndiaStateTopojsonFiles/master/Maharashtra.topojson'
+        },
+        {
+          type: 'topo',
+          url: 'https://raw.githubusercontent.com/shuklaneerajdev/IndiaStateTopojsonFiles/master/Maharashtra.topojson'
+        },
+        {
+          type: 'topo',
+          url: 'https://raw.githubusercontent.com/udit-001/india-maps-data/main/topojson/states/maharashtra.json'
+        }
       ];
 
-      for (const src of urls) {
+      for (const src of mirrors) {
         try {
-          const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 5000);
-          const res = await fetch(src.url, { signal: controller.signal });
-          clearTimeout(timer);
-          if (!res.ok) continue;
-
-          const data = await res.json();
+          const data = await fetchWithTimeout(src.url, 8500);
           let geo = null;
-          if (src.type === 'topo' && data.objects) {
+          if (src.type === 'topo' && data && data.objects) {
             const objKey = Object.keys(data.objects)[0];
             geo = topojson.feature(data, data.objects[objKey]);
-          } else if (data.features) {
+          } else if (data && data.features) {
             geo = data;
           }
 
           if (geo && geo.features && geo.features.length >= 30) {
-            const features = geo.features;
-            const rightReserve = window.innerWidth >= 1024 ? Math.min(510, Math.round(width * 0.39)) : 15;
-            projection = d3.geoMercator().fitExtent([[12, 10], [Math.max(320, width - rightReserve), height - 20]], geo);
-            const pathGen = d3.geoPath().projection(projection);
-
-            mapRoot.selectAll('*').remove();
-            renderBaseCartography(width, height);
-
-            // Ensure topographic filter exists after SVG clear
-            let defs = svgEl.select('defs');
-            if (defs.empty()) defs = svgEl.append('defs');
-            if (defs.select('#districtInnerBevel').empty()) {
-              const bevelFilter = defs.append('filter')
-                .attr('id', 'districtInnerBevel')
-                .attr('x', '-5%').attr('y', '-5%').attr('width', '110%').attr('height', '110%');
-              bevelFilter.append('feDropShadow')
-                .attr('dx', 0).attr('dy', 1.2).attr('stdDeviation', 1.2)
-                .attr('flood-color', '#0F172A').attr('flood-opacity', 0.14);
+            cachedExactGeoJson = geo;
+            try {
+              localStorage.setItem('mh_exact_geojson_v1', JSON.stringify(geo));
+            } catch (storageErr) {
+              // Ignore quota errors
             }
 
-            // Coastal Sea-Breeze Aura & 3D Relief Drop Shadow under Maharashtra
-            mapRoot.append('path')
-              .attr('d', pathGen(geo))
-              .attr('class', 'coastal-glow-outline');
+            // Use current container dimensions in case the user resized while fetching
+            const container = document.getElementById('mapContainer');
+            const currW = Math.max(320, Math.round(container.getBoundingClientRect().width) || width);
+            const currH = Math.max(420, Math.round(container.getBoundingClientRect().height) || height);
+            svgEl.attr('viewBox', `0 0 ${currW} ${currH}`);
 
-            mapRoot.append('path')
-              .attr('d', pathGen(geo))
-              .attr('fill', '#64748B')
-              .attr('opacity', 0.35)
-              .attr('transform', 'translate(5, 7)')
-              .style('pointer-events', 'none');
-
-            const enriched = features.map((f, idx) => {
-              const p = f.properties || {};
-              const candidateProps = [p.NAME_2, p.district, p.DISTRICT, p.dtname, p.DIST_NAME, p.Name, p.name];
-              let district = null;
-              let rawName = '';
-              for (const val of candidateProps) {
-                if (typeof val === 'string' && val.trim()) {
-                  if (!rawName) rawName = val.trim();
-                  const matched = matchDistrictByName(val);
-                  if (matched) {
-                    district = matched;
-                    break;
-                  }
-                }
-              }
-              // Coordinate proximity fallback so every TopoJSON polygon gets its exact district color & name
-              if (!district) {
-                const c = d3.geoCentroid(f);
-                if (c && !isNaN(c[0]) && !isNaN(c[1])) {
-                  let minDist = Infinity;
-                  MAHARASHTRA_DISTRICTS.forEach(d => {
-                    const distSq = Math.pow(d.coords[0] - c[0], 2) + Math.pow(d.coords[1] - c[1], 2);
-                    if (distSq < minDist) {
-                      minDist = distSq;
-                      district = d;
-                    }
-                  });
-                }
-              }
-              const fallbackColor = DISTRICT_COLORS[idx % DISTRICT_COLORS.length];
-              return { feature: f, district, fallbackColor, rawName };
-            });
-
-            mapRoot.selectAll('path.district-path')
-              .data(enriched)
-              .enter()
-              .append('path')
-              .attr('class', 'district-path')
-              .attr('data-district-id', d => d.district ? d.district.id : '')
-              .attr('d', d => pathGen(d.feature))
-              .attr('fill', d => d.district ? d.district.fillColor : d.fallbackColor)
-              .on('click', function (event, d) {
-                event.stopPropagation();
-                if (!d.district) return;
-                appState.isLocked = true;
-                renderDistrictPlacesList(d.district.id, true, true, true);
-              });
-
-            // Group polygons per district and place the icon & name at the largest polygon's centroid
-            const byDistrict = new Map();
-            enriched.forEach(d => {
-              if (!d.district) return;
-              const area = d3.geoArea(d.feature);
-              const existing = byDistrict.get(d.district.id);
-              if (!existing || area > existing.area) {
-                const c = pathGen.centroid(d.feature);
-                if (!isNaN(c[0]) && !isNaN(c[1])) {
-                  byDistrict.set(d.district.id, { district: d.district, x: c[0], y: c[1], area });
-                }
-              }
-            });
-            const centroids = Array.from(byDistrict.values());
-
-            mapRoot.selectAll('text.district-famous-icon')
-              .data(centroids)
-              .enter()
-              .append('text')
-              .attr('class', 'district-famous-icon')
-              .attr('x', d => d.x)
-              .attr('y', d => d.y)
-              .text(d => '');
-
-            mapRoot.selectAll('text.district-label')
-              .data(centroids)
-              .enter()
-              .append('text')
-              .attr('class', 'district-label')
-              .attr('x', d => d.x)
-              .attr('y', d => d.y)
-              .text(d => d.district.name);
-
-            updateMapStyling();
-            updateLabelPlacement();
-            drawTrackerRouteOnMap();
-            break;
+            drawGeoJsonFeatures(geo, currW, currH);
+            return;
           }
         } catch (err) {
-          // Keep instant Voronoi map seamlessly
+          // Try next CDN mirror automatically
         }
       }
+
+      // If all external CDNs are blocked on this network, keep the high-detail built-in map smoothly
+      showMapNetworkBadge('Offline Map Mode Active', true);
       drawTrackerRouteOnMap();
     }
 
