@@ -37,6 +37,7 @@
       top: 0;
       left: 0;
       width: 100%;
+      margin-top: 30px;
       padding: 12px;
       padding-bottom: 0px;
       margin-bottom: 0px;
@@ -149,33 +150,19 @@
       vector-effect: non-scaling-stroke;
       cursor: pointer;
       filter: url(#districtInnerBevel);
-      transition: fill 0.22s ease, stroke 0.18s ease, stroke-width 0.18s ease, opacity 0.22s ease, filter 0.22s ease;
+      transition: fill 0.18s ease, stroke 0.18s ease, stroke-width 0.18s ease, opacity 0.18s ease;
     }
 
-    /* Subtle visual cursor hint on hover without opening or shifting popup state */
+    /* Clean static visual cursor hint on hover without blinking or filter flicker */
     .district-path:not(.active-selected):hover {
       stroke: #0F172A;
       stroke-width: 2.3px;
-      filter: url(#districtInnerBevel) brightness(1.07) saturate(1.12);
     }
 
-    /* Clicked District Glowing Border Highlight */
+    /* Clicked District Static Highlight Border (No Blinking/Pulsing) */
     .district-path.active-selected {
       stroke: #F59E0B;
-      stroke-width: 4px;
-      filter: brightness(1.08) saturate(1.15) drop-shadow(0 0 12px rgba(245, 158, 11, 0.95)) drop-shadow(0 3px 6px rgba(15, 23, 42, 0.45));
-      animation: selectedDistrictPulse 2.2s ease-in-out infinite;
-    }
-
-    @keyframes selectedDistrictPulse {
-      0%, 100% {
-        stroke: #F59E0B;
-        stroke-width: 3.8px;
-      }
-      50% {
-        stroke: #FEF08A;
-        stroke-width: 4.8px;
-      }
+      stroke-width: 3.8px;
     }
 
     .district-path.dimmed {
@@ -214,14 +201,6 @@
       font-weight: 900;
       fill: #FFFFFF;
       text-anchor: middle;
-      pointer-events: none;
-    }
-
-    .graticule-line {
-      fill: none;
-      stroke: rgba(148, 163, 184, 0.28);
-      stroke-width: 0.85px;
-      stroke-dasharray: 3 3;
       pointer-events: none;
     }
 
@@ -277,15 +256,12 @@
 
     @keyframes middleRightPanelFlash {
       0% {
-        transform: translateY(-50%) scale(1);
         box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.65);
       }
       60% {
-        transform: translateY(-50%) scale(1);
         box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
       }
       100% {
-        transform: translateY(-50%) scale(1);
         box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
       }
     }
@@ -302,11 +278,59 @@
     }
     @media (min-width: 1024px) {
       .welcome-brand-responsive {
-        top: calc((100vh - 58px) / 2);
+        top: calc((100vh - 64px) / 2);
         bottom: auto;
         left: auto;
         right: clamp(20px, 3vw, 48px);
         transform: translateY(-50%);
+      }
+    }
+
+    /* Responsive Positioning for mapRouteTrackerBar:
+       - Mobile (< 768px): Top-right/center beside Compass Rose so it never overlaps the bottom Sahyadri Safari Logo
+       - Tablet & Desktop (>= 768px): Centered 50px above the bottom of the map container */
+    .route-tracker-responsive {
+      position: fixed;
+      top: 10px;
+      left: 52px;
+      right: 10px;
+      bottom: auto;
+      transform: none;
+      width: auto;
+      max-width: calc(100vw - 62px);
+    }
+    @media (min-width: 768px) {
+      .route-tracker-responsive {
+        position: absolute;
+        top: auto;
+        bottom: 50px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        width: max-content;
+        max-width: calc(100vw - 32px);
+      }
+    }
+
+    /* Responsive District Info Popup: Centered in the middle of the page on Mobile/Tablet, Middle-Right on Desktop */
+    .district-popup-responsive {
+      top: 50%;
+      left: 50%;
+      right: auto;
+      transform: translate(-50%, -50%);
+      width: min(560px, calc(100vw - 20px));
+      max-width: calc(100vw - 20px);
+      max-height: calc(100dvh - 148px);
+      overflow-x: hidden;
+    }
+    @media (min-width: 1024px) {
+      .district-popup-responsive {
+        top: calc((100dvh - 64px) / 2);
+        left: auto;
+        right: clamp(16px, 2.5vw, 36px);
+        transform: translateY(-50%);
+        width: min(490px, calc(100vw - 32px));
+        max-height: calc(100dvh - 110px);
       }
     }
 
@@ -320,6 +344,16 @@
       animation: natureKenBurns 22s ease-in-out infinite;
     }
 
+    .bg-photo-layer {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: opacity 1.6s ease-in-out;
+      will-change: opacity, transform;
+    }
+
     @keyframes ambientAuroraPulse {
       0%, 100% { opacity: 0.72; transform: scale(1); }
       50% { opacity: 0.92; transform: scale(1.06); }
@@ -330,33 +364,52 @@
 
     /* Animated Tourist Car Road Strip */
     @keyframes roadCarDrive {
-      0% { transform: translateX(-140px); }
-      100% { transform: translateX(calc(100vw + 140px)); }
+      0% { transform: translateX(-180px); }
+      100% { transform: translateX(calc(100vw + 180px)); }
     }
     .road-car-anim {
-      animation: roadCarDrive 14s linear infinite;
+      animation: roadCarDrive 16s linear infinite;
+      will-change: transform;
     }
 
-    @keyframes roadStripeMove {
-      0% { background-position: 0 0; }
-      100% { background-position: -80px 0; }
-    }
     .road-stripes {
       background-image: linear-gradient(90deg, #FACC15 55%, transparent 55%);
       background-size: 40px 4px;
-      animation: roadStripeMove 0.85s linear infinite;
+    }
+
+    @keyframes kombiWheelSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .kombi-wheel {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: kombiWheelSpin 0.65s linear infinite;
+    }
+
+    @keyframes kombiSuspension {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-1.2px); }
+    }
+    .kombi-body-bounce {
+      animation: kombiSuspension 0.45s ease-in-out infinite;
     }
 
     /* Route Line between From & To Districts on Map */
     .safari-route-line {
       fill: none;
       stroke: #0F172A;
-      stroke-width: 3.5px;
+      stroke-width: 3px;
       stroke-linecap: round;
-      stroke-dasharray: 8 6;
+      stroke-dasharray: 7 5;
+      vector-effect: non-scaling-stroke;
       pointer-events: none;
-      filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.95));
+      filter: drop-shadow(0 0 3px rgba(250, 204, 21, 0.95));
       animation: routeDashFlow 1.2s linear infinite;
+    }
+
+    @keyframes routeDashFlow {
+      to { stroke-dashoffset: -24; }
     }
 
     @keyframes routeDashFlow {
@@ -376,6 +429,14 @@
        FULL-SCREEN 36-DISTRICT COLORFUL MAHARASHTRA MAP & FLOATING POPUP
        ========================================================================= -->
   <section id="bannerSection" class="relative overflow-hidden h-screen w-full flex flex-col justify-between p-0 bg-gradient-to-br from-slate-50 via-stone-100 to-sky-50">
+    <!-- Full-Screen Sliding Background Photo Layer (The_Sahyadri_Safari\Images) -->
+    <div id="bgSlideshowContainer" class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+      <div id="bgSlideA" class="bg-photo-layer nature-slide-motion opacity-0"></div>
+      <div id="bgSlideB" class="bg-photo-layer nature-slide-motion opacity-0"></div>
+      <!-- Soft Luminous White Haze Overlay -->
+      <div class="absolute inset-0 bg-white/45 backdrop-blur-[1.5px]"></div>
+    </div>
+
     <!-- Main Banner Workspace Content with Expanded Map proportions -->
     <div class="max-w-[1800px] w-full mx-auto relative z-10 flex-1 flex flex-col min-h-0 px-2 sm:px-4 pt-1 pb-0">
       <div id="activeCategoryBadge" class="hidden self-start mb-0.5 px-3 py-0.5 rounded-full bg-amber-400 text-slate-950 text-xs font-black uppercase shadow-lg">All Themes</div>
@@ -391,6 +452,35 @@
           <div id="mapContainer" class="relative flex-1 w-full h-full bg-transparent overflow-hidden select-none pb-0 mb-0">
             <svg id="maharashtraSvg" class="w-full h-full block absolute inset-0"></svg>
 
+            <!-- Always-Visible Responsive From -> To 36-District Distance Bar (Top on Mobile, Bottom-Left on Tablet/PC) -->
+            <div id="mapRouteTrackerBar" class="route-tracker-responsive z-30 flex flex-wrap items-center justify-center md:justify-start gap-1 sm:gap-2 bg-slate-950/92 backdrop-blur-xl border border-amber-400/80 rounded-2xl md:rounded-full px-2.5 sm:px-4 py-1.5 shadow-[0_8px_28px_rgba(15,23,42,0.45)]">
+              <div class="flex items-center gap-1">
+                <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-emerald-400">From</span>
+                <select id="fromDistrictSelect" aria-label="From District" class="bg-slate-800 hover:bg-slate-700 text-white text-[10px] sm:text-xs font-bold rounded-full px-1.5 sm:px-2 py-0.5 border border-slate-600 focus:outline-none focus:border-amber-400 cursor-pointer max-w-[92px] sm:max-w-[140px]">
+                </select>
+              </div>
+
+              <button id="swapDistrictsBtn" type="button" title="Swap From & To Districts" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-400/20 hover:bg-amber-400 text-amber-300 hover:text-slate-950 text-[11px] sm:text-xs font-black flex items-center justify-center transition cursor-pointer shrink-0">⇄</button>
+
+              <div class="flex items-center gap-1">
+                <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-amber-400">To</span>
+                <select id="toDistrictSelect" aria-label="To District" class="bg-slate-800 hover:bg-slate-700 text-white text-[10px] sm:text-xs font-bold rounded-full px-1.5 sm:px-2 py-0.5 border border-slate-600 focus:outline-none focus:border-amber-400 cursor-pointer max-w-[92px] sm:max-w-[140px]">
+                </select>
+              </div>
+
+              <div class="h-4 w-[1px] bg-slate-700 hidden sm:block"></div>
+
+              <!-- Live Odometer KM Readout -->
+              <div class="flex items-center gap-1 sm:gap-1.5 whitespace-nowrap">
+                <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] sm:text-xs font-black tracking-tight shadow-xs">
+                  <span id="trackerKmVal">0</span> KM
+                </span>
+                <span id="trackerDriveTime" class="text-[10px] sm:text-[11px] font-bold text-amber-300">
+                  (--)
+                </span>
+              </div>
+            </div>
+
             <!-- Compass Rose (Top Left) -->
             <div class="absolute top-2.5 left-2.5 pointer-events-none flex items-center z-10">
               <div class="w-9 h-9 rounded-full bg-white/95 border border-slate-300 shadow-md flex items-center justify-center shrink-0">
@@ -404,41 +494,41 @@
             </div>
 
             <!-- INITIAL WELCOME BRANDING (BELOW MAP ON MOBILE, MIDDLE-RIGHT ON DESKTOP) -->
-            <div id="welcomeBrandBanner" class="welcome-brand-responsive fixed z-30 pointer-events-none select-none inline-flex flex-col w-max max-w-[92vw] transition-opacity duration-300">
-              <span class="font-display text-base sm:text-xl lg:text-2xl font-bold text-slate-900 leading-none text-left drop-shadow-[0_1px_6px_rgba(255,255,255,0.95)]">
+            <div id="welcomeBrandBanner" class="welcome-brand-responsive fixed z-20 pointer-events-none select-none inline-flex flex-col w-max max-w-[92vw] px-3 py-1 transition-opacity duration-300">
+              <span class="font-display text-base sm:text-xl lg:text-2xl font-bold text-slate-900 leading-none text-left drop-shadow-[0_1px_4px_rgba(255,255,255,0.95)]">
                 The
               </span>
-              <h1 class="font-display text-3xl sm:text-5xl lg:text-[75px] font-black tracking-tight text-slate-900 leading-[1.08] drop-shadow-[0_2px_10px_rgba(255,255,255,0.95)]">
+              <h1 class="font-display text-3xl sm:text-5xl lg:text-[80px] font-black tracking-tight text-slate-900 leading-[1.08] drop-shadow-[0_2px_8px_rgba(255,255,255,0.95)]">
                 Sahyadri Safari
               </h1>
-              <p class="mt-1 text-sm sm:text-lg lg:text-2xl font-bold tracking-wide text-rose-500 text-right drop-shadow-[0_1px_6px_rgba(255,255,255,0.95)]">
+              <p class="mt-1 text-sm sm:text-lg lg:text-2xl font-bold tracking-wide text-rose-600 text-right drop-shadow-[0_1px_4px_rgba(255,255,255,0.95)]">
                 - Tour N Travaller-
               </p>
             </div>
 
-            <!-- FLOATING ON-MAP MIDDLE-RIGHT FROSTED GLASS POPUP -->
-            <aside id="districtPlacesPanel" style="top: calc((100vh - 58px) / 2); right: clamp(16px, 2.5vw, 36px); left: auto; transform: translateY(-50%); width: min(490px, calc(100vw - 32px)); max-height: calc(100vh - 104px); box-sizing: border-box;" class="hidden fixed z-40 bg-white/90 backdrop-blur-2xl rounded-2xl border border-white/95 ring-1 ring-slate-900/10 shadow-[0_20px_50px_rgba(15,23,42,0.28)] flex flex-col overflow-hidden text-slate-900 right-popup-enter">
+            <!-- FLOATING RESPONSIVE FROSTED GLASS POPUP -->
+            <aside id="districtPlacesPanel" style="box-sizing: border-box;" class="district-popup-responsive hidden fixed z-40 bg-white/95 backdrop-blur-2xl rounded-2xl border border-white/95 ring-1 ring-slate-900/10 shadow-[0_20px_50px_rgba(15,23,42,0.28)] flex flex-col overflow-hidden text-slate-900">
               <!-- Popup Header -->
-              <div class="px-4 py-3 bg-gradient-to-r from-amber-50/95 via-white/90 to-orange-50/95 border-b border-slate-200/80 flex items-start justify-between gap-2.5 shrink-0">
-                <div class="flex items-start gap-2.5 min-w-0 flex-1">
+              <div class="px-3.5 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-amber-50/95 via-white/90 to-orange-50/95 border-b border-slate-200/80 flex items-start justify-between gap-2 shrink-0">
+                <div class="flex items-start gap-2 sm:gap-2.5 min-w-0 flex-1">
                   <!-- Creative Yellow Maharashtra RTO Number Plate Badge -->
                   <div id="panelRtoPlate" class="inline-flex items-stretch rounded-[7px] bg-gradient-to-b from-amber-300 via-yellow-400 to-amber-500 border-[1.5px] border-slate-950 shadow-[0_2px_6px_rgba(245,158,11,0.35)] overflow-hidden select-none shrink-0 mt-0.5">
                     <span class="bg-[#0B3B8C] text-white text-[8px] font-black px-1 py-1 flex flex-col items-center justify-center leading-none tracking-tighter">
                       <span class="w-1 h-1 rounded-full bg-amber-300 mb-[2px]"></span>
                       IND
                     </span>
-                    <span id="panelRtoCode" class="px-2 py-1 text-slate-950 font-mono font-black text-xs tracking-wider flex items-center whitespace-nowrap">
+                    <span id="panelRtoCode" class="px-1.5 sm:px-2 py-1 text-slate-950 font-mono font-black text-[11px] sm:text-xs tracking-wider flex items-center whitespace-nowrap">
                       MH 12
                     </span>
                   </div>
 
                   <!-- District English Name + Line Break + Marathi Name + Tag -->
                   <div class="min-w-0 flex-1">
-                    <h2 class="text-lg sm:text-xl font-black text-slate-900 leading-tight break-words">
+                    <h2 class="text-base sm:text-xl font-black text-slate-900 leading-tight break-words">
                       <span id="panelDistrictEn" class="block">Pune</span>
                       <span id="panelDistrictMr" class="inline-block mt-0.5 px-2 py-0.5 rounded bg-amber-100/90 border border-amber-300/80 text-amber-900 font-marathi text-xs sm:text-sm font-bold leading-snug">पुणे</span>
                     </h2>
-                    <p id="panelDistrictTag" class="mt-0.5 text-xs font-semibold text-slate-600 truncate">Forts, Lonavala &amp; Karla</p>
+                    <p id="panelDistrictTag" class="mt-0.5 text-[11px] sm:text-xs font-semibold text-slate-600 break-words">Forts, Lonavala &amp; Karla</p>
                   </div>
                 </div>
 
@@ -449,7 +539,7 @@
               </div>
 
               <!-- Scrollable District Attractions Grid -->
-              <div id="panelPlacesBody" class="p-3.5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2.5 flex-1 min-h-0">
+              <div id="panelPlacesBody" class="p-3 sm:p-3.5 overflow-y-auto overflow-x-hidden grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 flex-1 min-h-0">
                 <!-- Populated dynamically when a district is clicked -->
               </div>
             </aside>
@@ -458,71 +548,14 @@
       </div>
     </div>
 
-    <!-- Animated Road & Moving Tourist Safari Car with Live From -> To All-District Miles Tracker -->
-    <div class="relative w-full h-[58px] bg-slate-950 border-t-2 border-b-2 border-amber-400 shadow-[0_-4px_20px_rgba(15,23,42,0.5)] overflow-hidden m-0 p-0 flex items-center justify-between px-2 sm:px-4 z-30 shrink-0">
-      <!-- Asphalt Texture & Center Dashed Stripes -->
+    <!-- Clear Animated Road & Moving Multi-Car Strip -->
+    <div class="relative w-full h-[64px] bg-slate-950 border-t-2 border-b-2 border-amber-400 shadow-[0_-4px_20px_rgba(15,23,42,0.5)] overflow-hidden m-0 p-0 flex items-center z-30 shrink-0">
+      <!-- Asphalt Texture & Stationary Center Dashed Stripes -->
       <div class="absolute inset-0 bg-slate-900"></div>
       <div class="absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 road-stripes opacity-85"></div>
 
-      <!-- Moving Tourist Safari Car in Aura White Color -->
-      <div class="absolute bottom-1 z-20 road-car-anim flex items-center pointer-events-none">
-        <div class="relative flex items-center">
-          <!-- Safari Car Body SVG (Aura White Edition) -->
-          <svg viewBox="0 0 110 46" class="w-24 h-10 drop-shadow-[0_4px_8px_rgba(0,0,0,0.65)]">
-            <!-- Roof Luggage / Carrier -->
-            <rect x="25" y="4" width="45" height="4" rx="1.5" fill="#334155"/>
-            <rect x="32" y="1" width="12" height="4" rx="1" fill="#F59E0B"/>
-            <rect x="48" y="1" width="16" height="4" rx="1" fill="#10B981"/>
-            <!-- Car Body (Glossy Aura White with sleek dark trim) -->
-            <path d="M10,26 L15,16 Q20,10 32,10 L75,10 Q88,10 94,18 L100,26 L102,34 Q102,38 96,38 L14,38 Q8,38 8,34 Z" fill="#F8FAFC" stroke="#0F172A" stroke-width="2"/>
-            <!-- Modern Aura Grille Accent -->
-            <path d="M98,28 L102,28 L102,34 L98,34 Z" fill="#0EA5E9"/>
-            <!-- Windows -->
-            <path d="M30,13 L45,13 L45,24 L22,24 Q24,15 30,13 Z" fill="#1E293B" stroke="#0F172A" stroke-width="1.5"/>
-            <path d="M49,13 L75,13 Q78,18 78,24 L49,24 Z" fill="#1E293B" stroke="#0F172A" stroke-width="1.5"/>
-            <!-- Headlights & Tail Lights -->
-            <rect x="96" y="27" width="4" height="6" rx="1" fill="#FEF08A"/>
-            <rect x="3" y="28" width="5" height="5" rx="1.5" fill="#EF4444"/>
-            <!-- Maharashtra RTO Number Plate on Car -->
-            <rect x="70" y="28" width="20" height="7" rx="1" fill="#FACC15" stroke="#0F172A" stroke-width="0.8"/>
-            <text id="carRtoText" x="80" y="33.5" font-size="4.5" font-weight="900" fill="#0F172A" text-anchor="middle">MH 12</text>
-            <!-- Wheels with Alloy rims -->
-            <circle cx="28" cy="38" r="7.5" fill="#1E293B" stroke="#94A3B8" stroke-width="2"/>
-            <circle cx="28" cy="38" r="2.5" fill="#E2E8F0"/>
-            <circle cx="82" cy="38" r="7.5" fill="#1E293B" stroke="#94A3B8" stroke-width="2"/>
-            <circle cx="82" cy="38" r="2.5" fill="#E2E8F0"/>
-          </svg>
-        </div>
-      </div>
-
-      <!-- Interactive From -> To 36-District Distance & Miles Tracker Control Bar -->
-      <div class="relative z-20 mx-auto flex items-center gap-1.5 sm:gap-2.5 bg-slate-950/90 backdrop-blur-md border border-amber-400/70 rounded-full px-2.5 sm:px-4 py-1 shadow-[0_4px_16px_rgba(0,0,0,0.65)]">
-        <div class="flex items-center gap-1">
-          <span class="text-[10px] font-black uppercase tracking-wider text-emerald-400 hidden sm:inline">From</span>
-          <select id="fromDistrictSelect" aria-label="From District" class="bg-slate-800 hover:bg-slate-700 text-white text-[11px] sm:text-xs font-bold rounded-full px-2 py-0.5 border border-slate-600 focus:outline-none focus:border-amber-400 cursor-pointer max-w-[115px] sm:max-w-[145px]">
-          </select>
-        </div>
-
-        <button id="swapDistrictsBtn" type="button" title="Swap From & To Districts" class="w-6 h-6 rounded-full bg-amber-400/20 hover:bg-amber-400 text-amber-300 hover:text-slate-950 text-xs font-black flex items-center justify-center transition cursor-pointer shrink-0">⇄</button>
-
-        <div class="flex items-center gap-1">
-          <span class="text-[10px] font-black uppercase tracking-wider text-amber-400 hidden sm:inline">To</span>
-          <select id="toDistrictSelect" aria-label="To District" class="bg-slate-800 hover:bg-slate-700 text-white text-[11px] sm:text-xs font-bold rounded-full px-2 py-0.5 border border-slate-600 focus:outline-none focus:border-amber-400 cursor-pointer max-w-[115px] sm:max-w-[145px]">
-          </select>
-        </div>
-
-        <div class="h-4 w-[1px] bg-slate-700 mx-0.5"></div>
-
-        <!-- Live Odometer KM Readout -->
-        <div class="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
-          <span class="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[11px] sm:text-xs font-black tracking-tight shadow-xs">
-            <span id="trackerKmVal">89</span> KM
-          </span>
-          <span id="trackerDriveTime" class="hidden md:inline-block text-[11px] font-bold text-amber-300">
-            (~1h 51m)
-          </span>
-        </div>
-      </div>
+      <!-- Multi-Car Fleet Running Immediately on Open (Yellow Kombi Camper + 1973 Orange Fastback + Classic Yellow Hatchback) -->
+      <div id="roadMultiCarFleet" class="absolute inset-0 pointer-events-none"></div>
     </div>
   </section>
 
@@ -969,19 +1002,426 @@
       selectedCategory: 'all',
       showIcons: true,
       showNames: true,
-      fromDistrictId: 'pune',
-      toDistrictId: 'raigad'
+      fromDistrictId: '',
+      toDistrictId: '',
+      routeStarted: false
     };
 
-    // -------------------------------------------------------------------------
-    // ALL-DISTRICT DISTANCE & MILES TRACKER (HAVERSINE + SAHYADRI ROAD FACTOR)
-    // -------------------------------------------------------------------------
+    const SAFARI_VEHICLE_SVG = `
+      <div class="relative flex items-center select-none drop-shadow-[0_4px_8px_rgba(0,0,0,0.65)]">
+        <svg viewBox="0 0 180 78" class="w-[116px] h-[50px] overflow-visible" aria-label="Sahyadri Safari Classic Yellow Camper Van">
+          <defs>
+            <linearGradient id="kombiYellow" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#FBBF24"/>
+              <stop offset="55%" stop-color="#F59E0B"/>
+              <stop offset="100%" stop-color="#D97706"/>
+            </linearGradient>
+            <linearGradient id="kombiWhiteTop" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#FFFFFF"/>
+              <stop offset="100%" stop-color="#E2E8F0"/>
+            </linearGradient>
+            <linearGradient id="headlightBeam" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stop-color="rgba(254, 249, 195, 0.85)"/>
+              <stop offset="100%" stop-color="rgba(254, 249, 195, 0)"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Warm Headlight Cone -->
+          <polygon points="154,48 205,36 205,64" fill="url(#headlightBeam)" />
+
+          <!-- Road Shadow under Camper Van -->
+          <ellipse cx="86" cy="72" rx="72" ry="4.5" fill="rgba(2, 6, 23, 0.72)" />
+
+          <!-- Camper Van Body Group with subtle suspension bounce -->
+          <g class="kombi-body-bounce">
+            <!-- White Pop-Top Roof -->
+            <path d="M 22 14 L 138 14 C 141 14 143 16 144 19 L 19 19 C 20 16 21 14 22 14 Z" fill="url(#kombiWhiteTop)" stroke="#94A3B8" stroke-width="0.8"/>
+
+            <!-- Upper White Cabin Belt -->
+            <path d="M 16 37 L 19 20 C 20 18 22 18 24 18 L 142 18 C 145 18 147 20 148 23 L 153 37 Z" fill="url(#kombiWhiteTop)" />
+
+            <!-- Iconic Yellow Lower Body -->
+            <path d="M 13 59 L 15 37 L 153 37 L 156 48 C 157 53 156 59 152 59 L 141 59 C 141 49 123 49 123 59 L 55 59 C 55 49 37 49 37 59 L 16 59 C 14 59 13 58 13 59 Z" fill="url(#kombiYellow)" stroke="#B45309" stroke-width="0.9"/>
+
+            <!-- Center Body Belt Trim -->
+            <line x1="15" y1="37" x2="153" y2="37" stroke="#F8FAFC" stroke-width="1.6"/>
+            <line x1="15" y1="38.2" x2="153" y2="38.2" stroke="#B45309" stroke-width="0.7"/>
+
+            <!-- Rear Air Vents -->
+            <g stroke="#475569" stroke-width="1.1" stroke-linecap="round">
+              <line x1="19" y1="23" x2="23" y2="23"/>
+              <line x1="18.5" y1="25.5" x2="22.8" y2="25.5"/>
+              <line x1="18" y1="28" x2="22.5" y2="28"/>
+              <line x1="17.5" y1="30.5" x2="22.2" y2="30.5"/>
+              <line x1="17" y1="33" x2="22" y2="33"/>
+            </g>
+
+            <!-- Rear Window with Checked Curtains -->
+            <rect x="27" y="21" width="33" height="13" rx="2.5" fill="#1E293B" stroke="#64748B" stroke-width="1.1"/>
+            <rect x="28.5" y="22.2" width="30" height="10.6" rx="1.8" fill="#BAE6FD" opacity="0.85"/>
+            <path d="M 28.5 22.2 L 35 22.2 L 33 32.8 L 28.5 32.8 Z" fill="#F8FAFC" opacity="0.9"/>
+            <path d="M 52 22.2 L 58.5 22.2 L 58.5 32.8 L 54 32.8 Z" fill="#F8FAFC" opacity="0.9"/>
+
+            <!-- Middle Louvered Camper Window -->
+            <rect x="65" y="21" width="38" height="13" rx="2.5" fill="#334155" stroke="#94A3B8" stroke-width="1.2"/>
+            <rect x="66.5" y="22.2" width="35" height="10.6" rx="1.5" fill="#7DD3FC" opacity="0.8"/>
+            <line x1="66.5" y1="25.7" x2="101.5" y2="25.7" stroke="#E2E8F0" stroke-width="1"/>
+            <line x1="66.5" y1="29.3" x2="101.5" y2="29.3" stroke="#E2E8F0" stroke-width="1"/>
+
+            <!-- Front Cab Window & Quarter Glass -->
+            <path d="M 108 21 L 141 21 C 143 21 144 22 145 24 L 149 34 L 108 34 Z" fill="#1E293B" stroke="#64748B" stroke-width="1.1"/>
+            <path d="M 109.5 22.2 L 135 22.2 L 135 32.8 L 109.5 32.8 Z" fill="#E0F2FE" opacity="0.88"/>
+            <path d="M 137 22.2 L 142 22.2 L 147 32.8 L 137 32.8 Z" fill="#BAE6FD" opacity="0.85"/>
+
+            <!-- Sliding Door & Cab Door Seams + Chrome Handles -->
+            <line x1="62" y1="37" x2="62" y2="57" stroke="#92400E" stroke-width="0.9"/>
+            <line x1="105" y1="20" x2="105" y2="58" stroke="#92400E" stroke-width="0.9"/>
+            <rect x="97" y="40" width="5" height="1.8" rx="0.9" fill="#F8FAFC" stroke="#475569" stroke-width="0.4"/>
+            <rect x="108" y="40" width="5" height="1.8" rx="0.9" fill="#F8FAFC" stroke="#475569" stroke-width="0.4"/>
+
+            <!-- Side Branding Badge -->
+            <text x="83" y="49" text-anchor="middle" font-size="6.2" font-weight="900" fill="#78350F" letter-spacing="0.4">SAHYADRI SAFARI</text>
+
+            <!-- Front Spare Tire Mounted on Nose -->
+            <rect x="153" y="36" width="6.5" height="19" rx="3" fill="#1E293B" stroke="#0F172A" stroke-width="0.9"/>
+            <line x1="156.2" y1="38" x2="156.2" y2="53" stroke="#475569" stroke-width="1" stroke-dasharray="2 1.5"/>
+
+            <!-- Headlight, Amber Turn Signal & Rear Taillight -->
+            <circle cx="153.5" cy="49" r="2.6" fill="#FEF9C3" stroke="#CA8A04" stroke-width="0.8"/>
+            <rect x="145" y="51" width="4.5" height="2.4" rx="0.8" fill="#EA580C" stroke="#7C2D12" stroke-width="0.4"/>
+            <rect x="14.5" y="50" width="3.5" height="3.2" rx="0.8" fill="#EF4444" stroke="#7F1D1D" stroke-width="0.4"/>
+
+            <!-- Front & Rear White Chrome Bumpers -->
+            <rect x="10" y="57.5" width="9" height="3.5" rx="1.5" fill="#F8FAFC" stroke="#64748B" stroke-width="0.7"/>
+            <rect x="150" y="57.5" width="10" height="3.5" rx="1.5" fill="#F8FAFC" stroke="#64748B" stroke-width="0.7"/>
+          </g>
+
+          <!-- Rear Wheel with Chrome Hubcap -->
+          <g class="kombi-wheel">
+            <circle cx="46" cy="60" r="11" fill="#1E293B" stroke="#0F172A" stroke-width="1.5"/>
+            <circle cx="46" cy="60" r="6.8" fill="#E2E8F0" stroke="#64748B" stroke-width="1"/>
+            <circle cx="46" cy="60" r="4.2" fill="#F8FAFC" stroke="#94A3B8" stroke-width="0.8"/>
+            <circle cx="46" cy="57.5" r="0.7" fill="#475569"/>
+            <circle cx="46" cy="62.5" r="0.7" fill="#475569"/>
+          </g>
+
+          <!-- Front Wheel with Chrome Hubcap -->
+          <g class="kombi-wheel">
+            <circle cx="132" cy="60" r="11" fill="#1E293B" stroke="#0F172A" stroke-width="1.5"/>
+            <circle cx="132" cy="60" r="6.8" fill="#E2E8F0" stroke="#64748B" stroke-width="1"/>
+            <circle cx="132" cy="60" r="4.2" fill="#F8FAFC" stroke="#94A3B8" stroke-width="0.8"/>
+            <circle cx="132" cy="57.5" r="0.7" fill="#475569"/>
+            <circle cx="132" cy="62.5" r="0.7" fill="#475569"/>
+          </g>
+        </svg>
+      </div>`;
+
+    // Classic 1973 Orange VW Passat Fastback Coupe SVG
+    const VINTAGE_ORANGE_COUPE_SVG = `
+      <div class="relative flex items-center select-none drop-shadow-[0_4px_8px_rgba(0,0,0,0.65)]">
+        <svg viewBox="0 0 185 72" class="w-[120px] h-[46px] overflow-visible" aria-label="1973 Orange Classic Fastback Coupe">
+          <defs>
+            <linearGradient id="orangeCoupePaint" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#FB923C"/>
+              <stop offset="48%" stop-color="#EA580C"/>
+              <stop offset="100%" stop-color="#C2410C"/>
+            </linearGradient>
+            <linearGradient id="coupeBeam" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stop-color="rgba(254, 249, 195, 0.8)"/>
+              <stop offset="100%" stop-color="rgba(254, 249, 195, 0)"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Headlight Beam -->
+          <polygon points="170,42 216,32 216,56" fill="url(#coupeBeam)"/>
+          <!-- Ground Shadow -->
+          <ellipse cx="92" cy="66" rx="78" ry="4" fill="rgba(2, 6, 23, 0.72)"/>
+
+          <g class="kombi-body-bounce">
+            <!-- Sleek Fastback Roof & Body Silhouette -->
+            <path d="M 14 48 L 16 36 C 18 33 26 28 48 16 C 53 13 58 13 65 13 L 106 13 C 113 13 118 16 128 31 L 166 34 C 171 35 173 38 173 43 L 172 52 L 154 52 C 154 41 134 41 134 52 L 54 52 C 54 41 34 41 34 52 L 14 52 Z" fill="url(#orangeCoupePaint)" stroke="#9A3412" stroke-width="0.9"/>
+
+            <!-- Fastback Rear & Side Windows with Chrome Trim -->
+            <path d="M 32 31 L 52 17 L 77 17 L 77 31 Z" fill="#1E293B" stroke="#E2E8F0" stroke-width="1.2"/>
+            <path d="M 35 30 L 53 18.5 L 75 18.5 L 75 30 Z" fill="#BAE6FD" opacity="0.82"/>
+
+            <path d="M 81 17 L 105 17 C 110 17 113 19 121 31 L 81 31 Z" fill="#1E293B" stroke="#E2E8F0" stroke-width="1.2"/>
+            <path d="M 83 18.5 L 104 18.5 C 108 18.5 111 20.5 118 30 L 83 30 Z" fill="#E0F2FE" opacity="0.88"/>
+
+            <!-- Chrome Side Beltline Molding & Door Seam -->
+            <line x1="16" y1="35" x2="171" y2="37" stroke="#F8FAFC" stroke-width="1.3"/>
+            <line x1="79" y1="31" x2="79" y2="51" stroke="#7C2D12" stroke-width="0.9"/>
+            <line x1="119" y1="31" x2="119" y2="51" stroke="#7C2D12" stroke-width="0.9"/>
+            <rect x="83" y="38" width="5.5" height="1.8" rx="0.8" fill="#F8FAFC" stroke="#475569" stroke-width="0.4"/>
+            <!-- Chrome Side Mirror -->
+            <rect x="111" y="27" width="5" height="3.2" rx="1" fill="#F8FAFC" stroke="#64748B" stroke-width="0.6"/>
+
+            <!-- Front Black Grille & Headlight -->
+            <rect x="167" y="36" width="5.5" height="9" rx="1" fill="#0F172A"/>
+            <circle cx="170" cy="40.5" r="2.6" fill="#FEF9C3" stroke="#E2E8F0" stroke-width="0.8"/>
+            <rect x="163" y="46" width="5" height="2" rx="0.7" fill="#F59E0B"/>
+            <!-- Rear Taillight -->
+            <rect x="13.5" y="38" width="3" height="6" rx="0.8" fill="#EF4444"/>
+
+            <!-- Chrome Front & Rear Bumpers -->
+            <rect x="9" y="49.5" width="11" height="3.8" rx="1.5" fill="#F8FAFC" stroke="#64748B" stroke-width="0.8"/>
+            <rect x="164" y="49.5" width="13" height="3.8" rx="1.5" fill="#F8FAFC" stroke="#64748B" stroke-width="0.8"/>
+          </g>
+
+          <!-- Rear Steel Wheel -->
+          <g class="kombi-wheel">
+            <circle cx="44" cy="54" r="10.5" fill="#1E293B" stroke="#0F172A" stroke-width="1.5"/>
+            <circle cx="44" cy="54" r="6.4" fill="#CBD5E1" stroke="#64748B" stroke-width="1"/>
+            <circle cx="44" cy="54" r="2.6" fill="#334155"/>
+          </g>
+
+          <!-- Front Steel Wheel -->
+          <g class="kombi-wheel">
+            <circle cx="144" cy="54" r="10.5" fill="#1E293B" stroke="#0F172A" stroke-width="1.5"/>
+            <circle cx="144" cy="54" r="6.4" fill="#CBD5E1" stroke="#64748B" stroke-width="1"/>
+            <circle cx="144" cy="54" r="2.6" fill="#334155"/>
+          </g>
+        </svg>
+      </div>`;
+
+    // Classic Yellow VW Polo / Golf Mk1 Hatchback SVG
+    const VINTAGE_YELLOW_HATCH_SVG = `
+      <div class="relative flex items-center select-none drop-shadow-[0_4px_8px_rgba(0,0,0,0.65)]">
+        <svg viewBox="0 0 175 72" class="w-[112px] h-[46px] overflow-visible" aria-label="Classic Yellow Vintage Hatchback">
+          <defs>
+            <linearGradient id="yellowHatchPaint" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#FDE047"/>
+              <stop offset="52%" stop-color="#EAB308"/>
+              <stop offset="100%" stop-color="#CA8A04"/>
+            </linearGradient>
+            <linearGradient id="hatchBeam" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stop-color="rgba(254, 249, 195, 0.8)"/>
+              <stop offset="100%" stop-color="rgba(254, 249, 195, 0)"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Headlight Beam -->
+          <polygon points="160,41 204,31 204,55" fill="url(#hatchBeam)"/>
+          <!-- Ground Shadow -->
+          <ellipse cx="86" cy="66" rx="72" ry="4" fill="rgba(2, 6, 23, 0.72)"/>
+
+          <g class="kombi-body-bounce">
+            <!-- Crisp Boxy 1970s Hatchback Body -->
+            <path d="M 16 52 L 22 20 C 23 16 26 14 31 14 L 96 14 C 102 14 106 17 115 31 L 157 34 C 161 35 163 38 163 43 L 162 52 L 144 52 C 144 41 124 41 124 52 L 50 52 C 50 41 30 41 30 52 L 16 52 Z" fill="url(#yellowHatchPaint)" stroke="#A16207" stroke-width="0.9"/>
+
+            <!-- Rear Quarter Window + Circular C-Pillar Vent -->
+            <path d="M 27 30 L 31 17.5 L 62 17.5 L 62 30 Z" fill="#1E293B" stroke="#475569" stroke-width="1"/>
+            <path d="M 29 29 L 32.5 18.8 L 60.5 18.8 L 60.5 29 Z" fill="#BAE6FD" opacity="0.82"/>
+            <circle cx="22.5" cy="24" r="2.2" fill="#1E293B" stroke="#FEF08A" stroke-width="0.6"/>
+
+            <!-- Front Door Window -->
+            <path d="M 66 17.5 L 95 17.5 C 99 17.5 102 19.5 109 30 L 66 30 Z" fill="#1E293B" stroke="#475569" stroke-width="1"/>
+            <path d="M 67.5 18.8 L 94 18.8 C 97.5 18.8 100 20.5 106.5 29 L 67.5 29 Z" fill="#E0F2FE" opacity="0.88"/>
+
+            <!-- Chrome Beltline Trim & Door Seam -->
+            <line x1="18" y1="34" x2="161" y2="36" stroke="#F8FAFC" stroke-width="1.3"/>
+            <line x1="64" y1="17" x2="64" y2="51" stroke="#854D0E" stroke-width="0.9"/>
+            <line x1="108" y1="30" x2="108" y2="51" stroke="#854D0E" stroke-width="0.9"/>
+            <rect x="68" y="38" width="5" height="1.8" rx="0.8" fill="#1E293B"/>
+
+            <!-- Front Black Grille & Round Headlight -->
+            <rect x="157" y="35.5" width="5.5" height="9.5" rx="1" fill="#0F172A"/>
+            <circle cx="159.5" cy="40.2" r="2.8" fill="#FEF9C3" stroke="#E2E8F0" stroke-width="0.9"/>
+            <!-- Rear Taillight -->
+            <rect x="15" y="38" width="3" height="6" rx="0.8" fill="#EF4444"/>
+
+            <!-- Chrome Bumpers with Black End Caps -->
+            <rect x="11" y="49.5" width="10" height="3.8" rx="1.4" fill="#F8FAFC" stroke="#1E293B" stroke-width="0.9"/>
+            <rect x="154" y="49.5" width="12" height="3.8" rx="1.4" fill="#F8FAFC" stroke="#1E293B" stroke-width="0.9"/>
+          </g>
+
+          <!-- Rear Steel Wheel -->
+          <g class="kombi-wheel">
+            <circle cx="40" cy="54" r="10.2" fill="#1E293B" stroke="#0F172A" stroke-width="1.5"/>
+            <circle cx="40" cy="54" r="6.2" fill="#CBD5E1" stroke="#64748B" stroke-width="1"/>
+            <circle cx="40" cy="54" r="2.4" fill="#334155"/>
+          </g>
+
+          <!-- Front Steel Wheel -->
+          <g class="kombi-wheel">
+            <circle cx="134" cy="54" r="10.2" fill="#1E293B" stroke="#0F172A" stroke-width="1.5"/>
+            <circle cx="134" cy="54" r="6.2" fill="#CBD5E1" stroke="#64748B" stroke-width="1"/>
+            <circle cx="134" cy="54" r="2.4" fill="#334155"/>
+          </g>
+        </svg>
+      </div>`;
+
+    // Royal Enfield Scram 440 (White, Navy Blue & Red Stripe Scrambler) SVG
+    const RE_SCRAM_BIKE_SVG = `
+      <div class="relative flex items-center select-none drop-shadow-[0_4px_8px_rgba(0,0,0,0.65)]">
+        <svg viewBox="0 0 155 86" class="w-[96px] h-[52px] overflow-visible" aria-label="Royal Enfield Scram 440 Motorcycle">
+          <defs>
+            <linearGradient id="scramBeam" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stop-color="rgba(254, 249, 195, 0.85)"/>
+              <stop offset="100%" stop-color="rgba(254, 249, 195, 0)"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Headlight Beam -->
+          <polygon points="118,30 166,22 166,46" fill="url(#scramBeam)"/>
+          <!-- Ground Shadow -->
+          <ellipse cx="76" cy="79" rx="58" ry="4" fill="rgba(2, 6, 23, 0.72)"/>
+
+          <!-- Rear Spoked Wheel with Red Rim Pinstripe -->
+          <g class="kombi-wheel">
+            <circle cx="34" cy="64" r="14.5" fill="none" stroke="#0F172A" stroke-width="5.2"/>
+            <circle cx="34" cy="64" r="11.8" fill="none" stroke="#EF4444" stroke-width="0.9"/>
+            <circle cx="34" cy="64" r="9.5" fill="none" stroke="#94A3B8" stroke-width="0.7" stroke-dasharray="2 2"/>
+            <circle cx="34" cy="64" r="4.2" fill="#334155" stroke="#CBD5E1" stroke-width="1"/>
+          </g>
+
+          <!-- Front Spoked Wheel with Red Rim Pinstripe -->
+          <g class="kombi-wheel">
+            <circle cx="122" cy="64" r="15" fill="none" stroke="#0F172A" stroke-width="4.8"/>
+            <circle cx="122" cy="64" r="12.4" fill="none" stroke="#EF4444" stroke-width="0.9"/>
+            <circle cx="122" cy="64" r="9.8" fill="none" stroke="#94A3B8" stroke-width="0.7" stroke-dasharray="2 2"/>
+            <circle cx="122" cy="64" r="4.2" fill="#334155" stroke="#CBD5E1" stroke-width="1"/>
+          </g>
+
+          <!-- Motorcycle Chassis, Tank & Rider Silhouette -->
+          <g class="kombi-body-bounce">
+            <!-- Swingarm & Rear Fender -->
+            <line x1="34" y1="64" x2="64" y2="56" stroke="#334155" stroke-width="3.2" stroke-linecap="round"/>
+            <path d="M 14 36 L 38 38 L 46 43 L 18 41 Z" fill="#F8FAFC" stroke="#94A3B8" stroke-width="0.7"/>
+            <rect x="13" y="36.5" width="3" height="2.8" rx="0.8" fill="#EF4444"/>
+
+            <!-- Black Engine Block & Chrome Header Pipe -->
+            <rect x="58" y="42" width="22" height="17" rx="3" fill="#1E293B" stroke="#0F172A" stroke-width="1"/>
+            <circle cx="66" cy="52" r="4.2" fill="#334155" stroke="#94A3B8" stroke-width="0.8"/>
+            <path d="M 80 45 C 88 45 87 59 78 60 L 52 60 L 24 49 L 28 45 L 54 56" fill="none" stroke="#CBD5E1" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Black & Silver Upswept Exhaust Muffler -->
+            <polygon points="50,56 23,46 26,41 53,52" fill="#1E293B" stroke="#94A3B8" stroke-width="0.8"/>
+
+            <!-- White Side Panel -->
+            <polygon points="48,39 63,39 60,48 49,47" fill="#F8FAFC" stroke="#94A3B8" stroke-width="0.7"/>
+
+            <!-- Stepped Black Scrambler Seat -->
+            <path d="M 24 35 L 44 35 C 50 35 54 38 64 38 L 65 41 L 26 39 Z" fill="#0F172A"/>
+
+            <!-- White & Navy Blue Tank with Red Stripe & Front Tank Rack -->
+            <path d="M 63 38 C 65 27 76 23 89 24 L 94 37 L 63 38 Z" fill="#F8FAFC" stroke="#64748B" stroke-width="0.8"/>
+            <path d="M 82 24 L 90 24.5 L 94 37 L 82 37 Z" fill="#0F2942"/>
+            <rect x="64" y="34" width="29" height="2.6" fill="#DC2626"/>
+            <rect x="87" y="29" width="9" height="7" rx="1.5" fill="#0F2942" stroke="#38BDF8" stroke-width="0.5"/>
+
+            <!-- Front Fork with Gaiters, White Mudguard & Round Headlight -->
+            <line x1="99" y1="24" x2="122" y2="64" stroke="#1E293B" stroke-width="3.4" stroke-linecap="round"/>
+            <path d="M 107 45 C 114 43 122 44 127 47" fill="none" stroke="#F8FAFC" stroke-width="2.6" stroke-linecap="round"/>
+            <rect x="108" y="24" width="6.5" height="8.5" rx="2" fill="#F8FAFC" stroke="#475569" stroke-width="0.8"/>
+            <circle cx="114.5" cy="28.2" r="2.5" fill="#FEF9C3"/>
+            <!-- Handlebar & Mirror -->
+            <line x1="96" y1="14" x2="102" y2="23" stroke="#0F172A" stroke-width="1.6"/>
+            <ellipse cx="96" cy="13" rx="2.2" ry="3.5" fill="#1E293B"/>
+          </g>
+        </svg>
+      </div>`;
+
+    // Yamaha XSR 155 (White & Red Tank, Gold USD Forks & Retro Ribbed Seat) SVG
+    const YAMAHA_XSR_BIKE_SVG = `
+      <div class="relative flex items-center select-none drop-shadow-[0_4px_8px_rgba(0,0,0,0.65)]">
+        <svg viewBox="0 0 155 86" class="w-[96px] h-[52px] overflow-visible" aria-label="Yamaha XSR 155 Retro Roadster">
+          <defs>
+            <linearGradient id="xsrBeam" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stop-color="rgba(254, 249, 195, 0.85)"/>
+              <stop offset="100%" stop-color="rgba(254, 249, 195, 0)"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Headlight Beam -->
+          <polygon points="118,30 166,22 166,46" fill="url(#xsrBeam)"/>
+          <!-- Ground Shadow -->
+          <ellipse cx="76" cy="79" rx="58" ry="4" fill="rgba(2, 6, 23, 0.72)"/>
+
+          <!-- Rear Alloy Wheel -->
+          <g class="kombi-wheel">
+            <circle cx="34" cy="64" r="14.5" fill="none" stroke="#0F172A" stroke-width="5.4"/>
+            <circle cx="34" cy="64" r="9.5" fill="none" stroke="#64748B" stroke-width="1.2" stroke-dasharray="3 2.5"/>
+            <circle cx="34" cy="64" r="4" fill="#1E293B" stroke="#CBD5E1" stroke-width="0.9"/>
+          </g>
+
+          <!-- Front Alloy Wheel with Brake Disc -->
+          <g class="kombi-wheel">
+            <circle cx="122" cy="64" r="14.5" fill="none" stroke="#0F172A" stroke-width="5"/>
+            <circle cx="122" cy="64" r="9.5" fill="none" stroke="#64748B" stroke-width="1.2" stroke-dasharray="3 2.5"/>
+            <circle cx="122" cy="64" r="6.2" fill="none" stroke="#E2E8F0" stroke-width="1.3"/>
+            <circle cx="122" cy="64" r="3.8" fill="#1E293B"/>
+          </g>
+
+          <!-- Motorcycle Chassis, Gold Forks & Teardrop Tank -->
+          <g class="kombi-body-bounce">
+            <!-- Swingarm & Tail Tidy -->
+            <line x1="34" y1="64" x2="64" y2="57" stroke="#1E293B" stroke-width="3.6" stroke-linecap="round"/>
+            <path d="M 18 36 L 34 38 L 32 41 L 16 39 Z" fill="#F8FAFC"/>
+            <circle cx="21" cy="34.5" r="2.2" fill="#DC2626" stroke="#0F172A" stroke-width="0.7"/>
+
+            <!-- Black Engine & Matte Black Exhaust -->
+            <rect x="60" y="40" width="23" height="20" rx="3" fill="#0F172A"/>
+            <circle cx="69" cy="52" r="4.5" fill="#1E293B" stroke="#475569" stroke-width="0.9"/>
+            <polygon points="56,59 27,51 30,45 59,54" fill="#1E293B" stroke="#475569" stroke-width="0.7"/>
+
+            <!-- Silver Perforated Side Bracket -->
+            <polygon points="44,39 58,39 55,44 45,43" fill="#CBD5E1"/>
+
+            <!-- Flat Ribbed Black Retro Seat -->
+            <rect x="26" y="33" width="38" height="5.5" rx="2.5" fill="#1E293B" stroke="#0F172A" stroke-width="0.8"/>
+
+            <!-- White Teardrop Tank with Red Top Crown -->
+            <path d="M 63 38 C 64 26 77 22 93 25 C 97 27 97 34 92 38 Z" fill="#F8FAFC" stroke="#64748B" stroke-width="0.8"/>
+            <path d="M 66 28 C 73 22 86 22 94 26 L 91 28 C 83 25 73 25 66 29 Z" fill="#DC2626"/>
+
+            <!-- Signature Gold USD Front Forks & Red Front Fender -->
+            <line x1="101" y1="24" x2="115" y2="49" stroke="#EAB308" stroke-width="4" stroke-linecap="round"/>
+            <line x1="115" y1="49" x2="122" y2="64" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 106 47 C 112 43 121 43 128 47" fill="none" stroke="#DC2626" stroke-width="3.2" stroke-linecap="round"/>
+
+            <!-- Round Black Retro Headlight & Twin Mirrors -->
+            <rect x="108" y="24" width="6.5" height="8" rx="2" fill="#0F172A"/>
+            <circle cx="114.5" cy="28" r="2.5" fill="#FEF9C3"/>
+            <line x1="98" y1="13" x2="103" y2="23" stroke="#0F172A" stroke-width="1.6"/>
+            <ellipse cx="98" cy="12" rx="2.2" ry="3.6" fill="#1E293B"/>
+          </g>
+        </svg>
+      </div>`;
+
+    const ROAD_FLEET_CARS = [
+      { id: 'kombi', svg: SAFARI_VEHICLE_SVG, slotIndex: 0, bottomClass: 'bottom-2' },
+      { id: 'scramBike', svg: RE_SCRAM_BIKE_SVG, slotIndex: 1, bottomClass: 'bottom-1.5' },
+      { id: 'orangeCoupe', svg: VINTAGE_ORANGE_COUPE_SVG, slotIndex: 2, bottomClass: 'bottom-1.5' },
+      { id: 'xsrBike', svg: YAMAHA_XSR_BIKE_SVG, slotIndex: 3, bottomClass: 'bottom-2.5' },
+      { id: 'yellowHatch', svg: VINTAGE_YELLOW_HATCH_SVG, slotIndex: 4, bottomClass: 'bottom-2.5' }
+    ];
+
+    function initRoadMultiCars(speedMultiplier = 1) {
+      const fleetEl = document.getElementById('roadMultiCarFleet');
+      if (!fleetEl) return;
+
+      // Uniform cycle duration and evenly distributed negative delays prevent any vehicle from overtaking or overlapping
+      const baseCycleSeconds = 18;
+      const cycleDuration = baseCycleSeconds / speedMultiplier;
+      const spacingInterval = cycleDuration / ROAD_FLEET_CARS.length;
+
+      fleetEl.innerHTML = ROAD_FLEET_CARS.map(car => {
+        const delay = -(car.slotIndex * spacingInterval).toFixed(2);
+        return `
+          <div class="absolute ${car.bottomClass} left-0 z-20 road-car-anim flex items-center pointer-events-none"
+               style="animation-duration: ${cycleDuration.toFixed(2)}s; animation-delay: ${delay}s;">
+            ${car.svg}
+          </div>
+        `;
+      }).join('');
+    }
+
     function calculateDistrictDistance(fromId, toId) {
+      if (!fromId || !toId) return { miles: 0, km: 0, hours: 0, mins: 0 };
       const d1 = getDistrict(fromId);
       const d2 = getDistrict(toId);
-      if (!d1 || !d2 || d1.id === d2.id) {
-        return { miles: 0, km: 0, hours: 0, mins: 0 };
-      }
+      if (!d1 || !d2 || d1.id === d2.id) return { miles: 0, km: 0, hours: 0, mins: 0 };
+
       const toRad = deg => (deg * Math.PI) / 180;
       const [lon1, lat1] = d1.coords;
       const [lon2, lat2] = d2.coords;
@@ -993,16 +1433,20 @@
         Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
         Math.sin(dLon / 2) * Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      // 1.26x road winding factor for Maharashtra highways & ghats
-      const roadKm = Math.max(12, Math.round(R_KM * c * 1.26));
+      const roadKm = Math.max(12, Math.round(R_KM * c * 1.24));
       const roadMiles = Math.max(7, Math.round(roadKm * 0.621371));
-      const totalMins = Math.round((roadKm / 48) * 60);
+      const totalMins = Math.max(15, Math.round((roadKm / 52) * 60));
       return {
         miles: roadMiles,
         km: roadKm,
         hours: Math.floor(totalMins / 60),
         mins: totalMins % 60
       };
+    }
+
+    function startSafariAnimation() {
+      initRoadMultiCars(1.22);
+      updateMilesTracker(false);
     }
 
     function updateMilesTracker(syncDropdowns = true) {
@@ -1016,17 +1460,14 @@
       const { km, hours, mins } = calculateDistrictDistance(appState.fromDistrictId, appState.toDistrictId);
       const kmEl = document.getElementById('trackerKmVal');
       const timeEl = document.getElementById('trackerDriveTime');
-      const carRtoEl = document.getElementById('carRtoText');
 
       if (kmEl) kmEl.textContent = km.toLocaleString();
       if (timeEl) {
-        timeEl.textContent = km === 0 ? '(Same District)' : `(~${hours}h ${mins}m)`;
-      }
-
-      const fromDist = getDistrict(appState.fromDistrictId);
-      const toDist = getDistrict(appState.toDistrictId);
-      if (carRtoEl && fromDist && fromDist.rto) {
-        carRtoEl.textContent = fromDist.rto.split('/')[0].trim();
+        if (!appState.fromDistrictId || !appState.toDistrictId) {
+          timeEl.textContent = '(Select From & To)';
+        } else {
+          timeEl.textContent = km === 0 ? '(Same District)' : `(~${hours}h ${mins}m)`;
+        }
       }
 
       drawTrackerRouteOnMap();
@@ -1036,6 +1477,7 @@
       if (!mapRoot || !projection) return;
       mapRoot.selectAll('g.safari-tracker-route').remove();
 
+      if (!appState.fromDistrictId || !appState.toDistrictId) return;
       const d1 = getDistrict(appState.fromDistrictId);
       const d2 = getDistrict(appState.toDistrictId);
       if (!d1 || !d2 || d1.id === d2.id) return;
@@ -1045,12 +1487,18 @@
       if (!p1 || !p2 || isNaN(p1[0]) || isNaN(p2[0])) return;
 
       const midX = (p1[0] + p2[0]) / 2;
-      const midY = (p1[1] + p2[1]) / 2 - 22;
+      const midY = (p1[1] + p2[1]) / 2 - Math.min(26, Math.abs(p2[0] - p1[0]) * 0.14 + 10);
+      const pathD = `M${p1[0].toFixed(1)},${p1[1].toFixed(1)} Q${midX.toFixed(1)},${midY.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
 
-      const routeG = mapRoot.append('g').attr('class', 'safari-tracker-route').style('pointer-events', 'none');
+      const routeG = mapRoot.append('g')
+        .attr('class', 'safari-tracker-route')
+        .style('pointer-events', 'none');
+      routeG.raise();
+
       routeG.append('path')
         .attr('class', 'safari-route-line')
-        .attr('d', `M${p1[0]},${p1[1]} Q${midX},${midY} ${p2[0]},${p2[1]}`);
+        .attr('fill', 'none')
+        .attr('d', pathD);
 
       routeG.append('circle')
         .attr('cx', p1[0]).attr('cy', p1[1]).attr('r', 5)
@@ -1059,6 +1507,18 @@
       routeG.append('circle')
         .attr('cx', p2[0]).attr('cy', p2[1]).attr('r', 5.5)
         .attr('fill', '#F59E0B').attr('stroke', '#0F172A').attr('stroke-width', 1.8);
+
+      // Animate safari vehicle icon along the route on top of the district map
+      const traveler = routeG.append('text')
+        .attr('font-size', '18px')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .text('🚙');
+
+      traveler.append('animateMotion')
+        .attr('dur', '3.5s')
+        .attr('repeatCount', 'indefinite')
+        .attr('path', pathD);
     }
 
     function initMilesTrackerDropdowns() {
@@ -1066,23 +1526,25 @@
       const toSel = document.getElementById('toDistrictSelect');
       if (!fromSel || !toSel) return;
 
-      const optionsHtml = MAHARASHTRA_DISTRICTS.map(d =>
+      const optionsList = MAHARASHTRA_DISTRICTS.map(d =>
         `<option value="${d.id}">${d.name} (${d.rto.split('/')[0].trim()})</option>`
       ).join('');
 
-      fromSel.innerHTML = optionsHtml;
-      toSel.innerHTML = optionsHtml;
-      fromSel.value = appState.fromDistrictId;
-      toSel.value = appState.toDistrictId;
+      fromSel.innerHTML = `<option value="">From where?</option>` + optionsList;
+      toSel.innerHTML = `<option value="">Where to go?</option>` + optionsList;
+      fromSel.value = '';
+      toSel.value = '';
 
       fromSel.addEventListener('change', (e) => {
         appState.fromDistrictId = e.target.value;
-        updateMilesTracker(false);
+        appState.routeStarted = true;
+        startSafariAnimation();
       });
 
       toSel.addEventListener('change', (e) => {
         appState.toDistrictId = e.target.value;
-        updateMilesTracker(false);
+        appState.routeStarted = true;
+        startSafariAnimation();
       });
 
       const swapBtn = document.getElementById('swapDistrictsBtn');
@@ -1146,14 +1608,6 @@
     function renderBaseCartography(width, height) {
       if (!projection) return;
       const gridG = mapRoot.append('g').style('pointer-events', 'none');
-
-      // Subtle Latitude / Longitude Cartographic Graticule Grid
-      const graticule = d3.geoGraticule().step([1.5, 1.5]);
-      const gratPath = d3.geoPath().projection(projection);
-      gridG.append('path')
-        .datum(graticule())
-        .attr('class', 'graticule-line')
-        .attr('d', gratPath);
 
       const [sx, sy] = projection([72.25, 17.65]);
       gridG.append('text')
@@ -1235,36 +1689,60 @@
         .attr('preserveAspectRatio', 'xMidYMid meet');
 
       svgEl.selectAll('*').remove();
-      mapRoot = svgEl.append('g');
+      mapRoot = svgEl.append('g').attr('class', 'maharashtra-map-root');
 
-      // If exact GeoJSON is already cached in memory or localStorage, render immediately without network delay
       if (cachedExactGeoJson) {
         drawGeoJsonFeatures(cachedExactGeoJson, width, height);
         return;
       }
 
       try {
-        const stored = localStorage.getItem('mh_exact_geojson_v1');
-        if (stored) {
-          const parsed = JSON.parse(stored);
+        const storedGeo = localStorage.getItem('mh_exact_geojson_v1');
+        if (storedGeo) {
+          const parsed = JSON.parse(storedGeo);
           if (parsed && parsed.features && parsed.features.length >= 30) {
             cachedExactGeoJson = parsed;
-            drawGeoJsonFeatures(cachedExactGeoJson, width, height);
+            drawGeoJsonFeatures(parsed, width, height);
             return;
           }
         }
       } catch (e) {
-        // Ignore storage errors in restricted environments
+        // Ignore storage read errors and fall back to built-in cartography
       }
 
-      // Instant fixed geographic Voronoi clipped inside high-detail Maharashtra state polygon (works 100% offline/on any network)
       renderVoronoiMap(width, height);
       updateMapStyling();
       updateLabelPlacement();
       drawTrackerRouteOnMap();
-
-      // Upgrade seamlessly to exact administrative TopoJSON boundaries across multiple CDN mirrors
       upgradeToExactTopoJson(width, height);
+    }
+
+    function getMapFitBounds(width, height) {
+      const isMobile = width < 1024;
+      const rightPad = isMobile ? width - 16 : Math.max(320, width - Math.min(510, Math.round(width * 0.39)));
+      return [[14, 14], [Math.max(220, rightPad), Math.max(220, height - 24)]];
+    }
+
+    function ensureSvgGradientsAndFilters(defs) {
+      if (defs.select('#districtInnerBevel').empty()) {
+        const bevelFilter = defs.append('filter')
+          .attr('id', 'districtInnerBevel')
+          .attr('x', '-5%').attr('y', '-5%').attr('width', '110%').attr('height', '110%');
+        bevelFilter.append('feDropShadow')
+          .attr('dx', 0).attr('dy', 1.2).attr('stdDeviation', 1.2)
+          .attr('flood-color', '#0F172A').attr('flood-opacity', 0.14);
+      }
+
+      if (defs.select('#safariLightningGradient').empty()) {
+        const grad = defs.append('linearGradient')
+          .attr('id', 'safariLightningGradient')
+          .attr('x1', '0%').attr('y1', '0%')
+          .attr('x2', '100%').attr('y2', '100%');
+        grad.append('stop').attr('offset', '0%').attr('stop-color', '#10B981');
+        grad.append('stop').attr('offset', '35%').attr('stop-color', '#FACC15');
+        grad.append('stop').attr('offset', '70%').attr('stop-color', '#FB7185');
+        grad.append('stop').attr('offset', '100%').attr('stop-color', '#38BDF8');
+      }
     }
 
     function renderVoronoiMap(width, height) {
@@ -1298,23 +1776,15 @@
       ];
 
       const boundaryGeo = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [mhBoundary] } };
-      // Optimized fit for a larger, bolder map view with inward popup clearance
-      const rightReserve = window.innerWidth >= 1024 ? Math.min(510, Math.round(width * 0.39)) : 15;
-      projection = d3.geoMercator().fitExtent([[12, 10], [Math.max(320, width - rightReserve), height - 20]], boundaryGeo);
+      // Responsive fit so mobile view clears the top route bar and bottom road without clipping any district
+      projection = d3.geoMercator().fitExtent(getMapFitBounds(width, height), boundaryGeo);
       const pathGen = d3.geoPath().projection(projection);
 
       renderBaseCartography(width, height);
 
       const defs = svgEl.append('defs');
       defs.append('clipPath').attr('id', 'mh-clip-boundary').append('path').attr('d', pathGen(boundaryGeo));
-
-      // Soft Topographic Depth & Inner Lighting Filter for Districts
-      const bevelFilter = defs.append('filter')
-        .attr('id', 'districtInnerBevel')
-        .attr('x', '-5%').attr('y', '-5%').attr('width', '110%').attr('height', '110%');
-      bevelFilter.append('feDropShadow')
-        .attr('dx', 0).attr('dy', 1.2).attr('stdDeviation', 1.2)
-        .attr('flood-color', '#0F172A').attr('flood-opacity', 0.14);
+      ensureSvgGradientsAndFilters(defs);
 
       // Coastal Sea-Breeze Aura & 3D Relief Drop Shadow under Maharashtra
       mapRoot.append('path')
@@ -1381,24 +1851,16 @@
       if (!geo || !geo.features || geo.features.length < 30) return;
 
       const features = geo.features;
-      const rightReserve = window.innerWidth >= 1024 ? Math.min(510, Math.round(width * 0.39)) : 15;
-      projection = d3.geoMercator().fitExtent([[12, 10], [Math.max(320, width - rightReserve), height - 20]], geo);
+      projection = d3.geoMercator().fitExtent(getMapFitBounds(width, height), geo);
       const pathGen = d3.geoPath().projection(projection);
 
       mapRoot.selectAll('*').remove();
       renderBaseCartography(width, height);
 
-      // Ensure topographic filter exists after SVG clear
+      // Ensure topographic filter & lightning gradients exist after SVG clear
       let defs = svgEl.select('defs');
       if (defs.empty()) defs = svgEl.append('defs');
-      if (defs.select('#districtInnerBevel').empty()) {
-        const bevelFilter = defs.append('filter')
-          .attr('id', 'districtInnerBevel')
-          .attr('x', '-5%').attr('y', '-5%').attr('width', '110%').attr('height', '110%');
-        bevelFilter.append('feDropShadow')
-          .attr('dx', 0).attr('dy', 1.2).attr('stdDeviation', 1.2)
-          .attr('flood-color', '#0F172A').attr('flood-opacity', 0.14);
-      }
+      ensureSvgGradientsAndFilters(defs);
 
       // Coastal Sea-Breeze Aura & 3D Relief Drop Shadow under Maharashtra
       mapRoot.append('path')
@@ -1599,6 +2061,7 @@
         });
 
       mapRoot.selectAll('path.district-path.active-selected').raise();
+      mapRoot.selectAll('g.safari-tracker-route').raise();
       mapRoot.selectAll('text.district-famous-icon').raise();
       mapRoot.selectAll('text.district-label').raise();
 
@@ -1619,16 +2082,15 @@
       const badge = document.getElementById('activeCategoryBadge');
       if (isFiltering) {
         const catObj = PLACE_CATEGORIES.find(c => c.key === cat);
-        badge.textContent = `Theme: ${catObj ? catObj.label : cat} (${matchingIds.size} Districts)`;
-        badge.classList.remove('hidden');
-      } else {
+        if (badge && catObj) {
+          badge.textContent = `${catObj.icon} ${catObj.label}`;
+          badge.classList.remove('hidden');
+        }
+      } else if (badge) {
         badge.classList.add('hidden');
       }
     }
 
-    // -------------------------------------------------------------------------
-    // RENDER RIGHT-SIDE DISTRICT PLACES POPUP
-    // -------------------------------------------------------------------------
     function closeDistrictPopup() {
       const panelEl = document.getElementById('districtPlacesPanel');
       const welcomeEl = document.getElementById('welcomeBrandBanner');
@@ -1648,9 +2110,17 @@
         appState.isLocked = true;
       }
 
-      // Sync destination in the From -> To KM tracker
+      // Ensure Map Route Tracker stays visible & update route animation
+      const trackerBar = document.getElementById('mapRouteTrackerBar');
+      if (trackerBar) trackerBar.classList.remove('hidden');
+
+      if (!appState.fromDistrictId) {
+        appState.fromDistrictId = 'pune';
+      }
       appState.toDistrictId = district.id;
+      appState.routeStarted = true;
       updateMilesTracker(true);
+      startSafariAnimation();
 
       const panelEl = document.getElementById('districtPlacesPanel');
       const rtoCodeEl = document.getElementById('panelRtoCode');
@@ -1672,15 +2142,15 @@
         if (!items || items.length === 0) return '';
         const isHighlighted = appState.selectedCategory === cat.key;
         return `
-          <div class="rounded-xl p-3 bg-white/95 border ${isHighlighted ? 'border-amber-400 ring-2 ring-amber-300/60' : 'border-slate-200/90'} shadow-xs flex flex-col gap-1.5">
-            <div class="flex items-center justify-between gap-2">
-              <div class="flex items-center gap-1.5 min-w-0">
+          <div class="min-w-0 w-full rounded-xl p-2.5 sm:p-3 bg-white/95 border ${isHighlighted ? 'border-amber-400 ring-2 ring-amber-300/60' : 'border-slate-200/90'} shadow-xs flex flex-col gap-1.5">
+            <div class="flex items-center justify-between gap-2 min-w-0">
+              <div class="flex items-center gap-1.5 min-w-0 flex-1">
                 <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
-                <span class="text-xs font-black uppercase tracking-wider text-slate-900 truncate">${cat.label}</span>
+                <span class="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-900 truncate">${cat.label}</span>
               </div>
-              <span class="px-2 py-0.5 rounded-full text-[11px] font-black ${cat.badge} border shrink-0">${items.length}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black ${cat.badge} border shrink-0">${items.length}</span>
             </div>
-            <p class="text-xs sm:text-[13px] font-medium text-slate-700 leading-relaxed">
+            <p class="text-xs sm:text-[13px] font-medium text-slate-700 leading-relaxed break-words">
               ${items.join(', ')}
             </p>
           </div>
@@ -1729,6 +2199,12 @@
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeDistrictPopup();
       });
+      // Initialize Background Photo Slideshow (The_Sahyadri_Safari\Images)
+      initBackgroundPhotoSlideshow();
+
+      // Start Multi-Car Fleet on Road immediately when page opens
+      initRoadMultiCars(1);
+
       // Initialize Miles Tracker & Map
       initMilesTrackerDropdowns();
       initMaharashtraMap();
@@ -1739,6 +2215,76 @@
         resizeTimer = setTimeout(() => initMaharashtraMap(), 250);
       });
     });
+
+    // -------------------------------------------------------------------------
+    // FULL-SCREEN SLIDING PHOTO GALLERY FROM The_Sahyadri_Safari\Images
+    // -------------------------------------------------------------------------
+    function initBackgroundPhotoSlideshow() {
+      const folderPhotos = [
+        'Ajantha Caves', 'Ajantha Caves1', 'Bibi Makbara', 'couple', 'Ellora',
+        'Kalsubai', 'kasubai (2)', 'Kasubai', 'Kokan (2)', 'Kokan (3)', 'Kokan',
+        'Matheran (2)', 'Matheran', 'Matheran1', 'Mathran (2)', 'Mathran',
+        'Mumbai', 'Pune (2)', 'Pune', 'Raigad (2)', 'Raigad (3)', 'Raigad',
+        'Raigad1', 'Tadoba (2)', 'Tadoba (3)', 'Tadoba', 'Waterfall'
+      ];
+
+      // Support opening the HTML either inside The_Sahyadri_Safari/ or in a sibling folder, with common image extensions
+      const baseDirs = ['Images/', 'The_Sahyadri_Safari/Images/', './Images/'];
+      const extensions = ['.jpg', '.jpeg', '.png', '.webp', '.JPG', '.JPEG', '.PNG'];
+
+      const slideA = document.getElementById('bgSlideA');
+      const slideB = document.getElementById('bgSlideB');
+      if (!slideA || !slideB) return;
+
+      let currentIndex = 0;
+      let activeLayer = 0; // 0 -> slideA, 1 -> slideB
+
+      function resolvePhotoUrl(baseName) {
+        return new Promise((resolve) => {
+          const candidates = [];
+          for (const dir of baseDirs) {
+            for (const ext of extensions) {
+              candidates.push(encodeURI(dir + baseName + ext));
+            }
+          }
+
+          let idx = 0;
+          function tryNext() {
+            if (idx >= candidates.length) {
+              resolve(null);
+              return;
+            }
+            const url = candidates[idx++];
+            const img = new Image();
+            img.onload = () => resolve(url);
+            img.onerror = () => tryNext();
+            img.src = url;
+          }
+          tryNext();
+        });
+      }
+
+      async function showSlide(photoIdx) {
+        const rawName = folderPhotos[photoIdx % folderPhotos.length];
+        const resolvedUrl = await resolvePhotoUrl(rawName);
+        if (!resolvedUrl) return;
+
+        const incoming = activeLayer === 0 ? slideA : slideB;
+        const outgoing = activeLayer === 0 ? slideB : slideA;
+
+        incoming.style.backgroundImage = `url("${resolvedUrl}")`;
+        incoming.style.opacity = '1';
+        outgoing.style.opacity = '0';
+        activeLayer = activeLayer === 0 ? 1 : 0;
+      }
+
+      // Show first image immediately and cycle smoothly every 5.5 seconds
+      showSlide(currentIndex);
+      setInterval(() => {
+        currentIndex = (currentIndex + 1) % folderPhotos.length;
+        showSlide(currentIndex);
+      }, 5500);
+    }
   </script>
 </body>
 </html>
