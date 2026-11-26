@@ -70,15 +70,25 @@
     .banner-section {
       position: relative;
       overflow: hidden;
-      height: 100vh;
-      height: 100dvh;
-      min-height: 560px;
+      height: 82vh;
+      height: 82dvh;
+      min-height: 550px;
+      max-height: 700px;
       width: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       padding: 0;
       background: linear-gradient(135deg, #E8EEF2 0%, #E5E7EB 50%, #E2ECF2 100%);
+    }
+
+    @media (min-width: 1024px) {
+      .banner-section {
+        height: 100vh;
+        height: 100dvh;
+        min-height: 560px;
+        max-height: none;
+      }
     }
 
     .bg-slideshow-container {
@@ -967,9 +977,9 @@
 
     .welcome-brand-banner {
       position: absolute;
-      top: auto;
-      bottom: 64px;
-      left: 50%;
+      top: 63%;
+      bottom: auto;
+      left: 62%;
       right: auto;
       transform: translateX(-50%);
       z-index: 20;
@@ -979,17 +989,18 @@
       flex-direction: column;
       align-items: flex-end;
       width: max-content;
-      max-width: calc(100vw - 148px);
-      padding: 4px 8px;
+      max-width: calc(100vw - 32px);
+      padding: 2px 8px;
       transition: none;
     }
 
     @media (min-width: 640px) {
       .welcome-brand-banner {
-        top: auto;
-        bottom: 68px;
+        top: 65%;
+        left: 58%;
+        bottom: auto;
         max-width: min(72vw, 520px);
-        padding: 8px 12px;
+        padding: 6px 12px;
       }
     }
 
@@ -1006,7 +1017,7 @@
 
     .welcome-heading {
       font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
-      font-size: clamp(24px, 6.4vw, 40px);
+      font-size: clamp(23px, 6.2vw, 38px);
       font-weight: 800;
       letter-spacing: -0.02em;
       color: #0B192C;
@@ -1071,24 +1082,31 @@
 
     .district-popup {
       position: fixed;
-      top: calc(74px + max(0px, (100dvh - 154px - min(400px, 100dvh - 164px)) / 2));
+      top: 124px;
       left: 50%;
       right: auto;
       transform: translateX(-50%);
-      width: min(370px, calc(100vw - 28px));
-      max-width: calc(100vw - 28px);
-      max-height: min(400px, calc(100dvh - 164px));
+      width: min(370px, calc(100vw - 24px));
+      max-width: calc(100vw - 24px);
+      max-height: min(360px, calc(100dvh - 205px));
       z-index: 45;
-      background-color: rgba(255, 255, 255, 0.95);
+      background-color: rgba(255, 255, 255, 0.96);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
-      border-radius: 12px;
+      border-radius: 14px;
       border: 1px solid rgba(255, 255, 255, 0.95);
       box-shadow: 0 16px 40px rgba(15, 23, 42, 0.24), 0 0 0 1px rgba(15, 23, 42, 0.1);
       display: flex;
       flex-direction: column;
       overflow: hidden;
       color: #0F172A;
+    }
+
+    @media (min-width: 768px) {
+      .district-popup {
+        top: 84px;
+        max-height: min(410px, calc(100dvh - 175px));
+      }
     }
 
     @media (min-width: 1024px) {
@@ -1324,6 +1342,46 @@
       overflow-wrap: break-word;
     }
 
+    @keyframes popupScrollSmokeRise {
+      0% {
+        opacity: 0.88;
+        transform: translate(-50%, -50%) scale(0.45) rotate(var(--smoke-rot-start, 0deg));
+      }
+      35% {
+        opacity: 0.74;
+        transform: translate(calc(-50% + var(--smoke-drift, 0px)), calc(-50% - 34px)) scale(1.18) rotate(var(--smoke-rot-mid, 12deg));
+      }
+      72% {
+        opacity: 0.42;
+        transform: translate(calc(-50% + calc(var(--smoke-drift, 0px) * 1.55)), calc(-50% - 82px)) scale(1.85) rotate(var(--smoke-rot-end, 26deg));
+      }
+      100% {
+        opacity: 0;
+        transform: translate(calc(-50% + calc(var(--smoke-drift, 0px) * 2.15)), calc(-50% - 135px)) scale(2.45) rotate(var(--smoke-rot-end, 38deg));
+      }
+    }
+
+    .scroll-smoke-burst {
+      position: fixed;
+      z-index: 65;
+      pointer-events: none;
+      width: 0;
+      height: 0;
+    }
+
+    .scroll-smoke-puff {
+      position: absolute;
+      left: 0;
+      top: 0;
+      border-radius: 46% 54% 48% 52% / 53% 45% 55% 47%;
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.92) 0%, rgba(241, 245, 249, 0.65) 42%, rgba(203, 213, 225, 0.25) 72%, rgba(148, 163, 184, 0) 100%),
+        radial-gradient(circle at 72% 68%, rgba(226, 232, 240, 0.55) 0%, rgba(148, 163, 184, 0) 75%);
+      filter: blur(8px);
+      mix-blend-mode: normal;
+      animation: popupScrollSmokeRise 1.05s cubic-bezier(0.22, 0.88, 0.36, 1) forwards;
+    }
+
     .empty-places-msg {
       text-align: center;
       padding: 24px 0;
@@ -1338,7 +1396,7 @@
     .road-strip {
       position: relative;
       width: 100%;
-      height: 66px;
+      height: 76px;
       background-color: #404040;
       border-top: none;
       border-bottom: 2px solid #262626;
@@ -1441,6 +1499,11 @@
       100% { transform: translateX(calc(100vw + 180px)); }
     }
 
+    @keyframes roadCarDriveReverse {
+      0% { transform: translateX(calc(100vw + 180px)); }
+      100% { transform: translateX(-180px); }
+    }
+
     .road-car-anim {
       position: absolute;
       left: 0;
@@ -1450,6 +1513,14 @@
       pointer-events: none;
       animation: roadCarDrive 16s linear infinite;
       will-change: transform;
+    }
+
+    .road-car-anim.reverse-lane {
+      animation-name: roadCarDriveReverse;
+    }
+
+    .vehicle-wrapper.facing-left {
+      transform: scaleX(-1);
     }
 
     .pos-bottom-6 { bottom: 6px; }
@@ -1464,11 +1535,23 @@
       filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.65));
     }
 
-    .svg-kombi { width: 116px; height: 50px; overflow: visible; }
-    .svg-coupe { width: 120px; height: 46px; overflow: visible; }
-    .svg-hatch { width: 112px; height: 46px; overflow: visible; }
-    .svg-bike  { width: 96px;  height: 52px; overflow: visible; }
-    .svg-msrtc { width: 158px; height: 56px; overflow: visible; }
+    .svg-kombi { width: 152px; height: 65px; display: block; flex-shrink: 0; }
+    .svg-coupe { width: 158px; height: 62px; display: block; flex-shrink: 0; }
+    .svg-hatch { width: 148px; height: 62px; display: block; flex-shrink: 0; }
+    .svg-bike  { width: 124px; height: 68px; display: block; flex-shrink: 0; }
+    .svg-msrtc { width: 206px; height: 71px; display: block; flex-shrink: 0; }
+    .svg-auto  { width: 114px; height: 59px; display: block; flex-shrink: 0; }
+    .svg-suv   { width: 168px; height: 66px; display: block; flex-shrink: 0; }
+
+    @media (max-width: 639px) {
+      .svg-kombi { width: 108px; height: 47px; }
+      .svg-coupe { width: 112px; height: 43px; }
+      .svg-hatch { width: 106px; height: 43px; }
+      .svg-bike  { width: 88px; height: 49px; }
+      .svg-msrtc { width: 146px; height: 52px; }
+      .svg-auto  { width: 80px; height: 42px; }
+      .svg-suv   { width: 120px; height: 47px; }
+    }
 
     @keyframes kombiWheelSpin {
       0% { transform: rotate(0deg); }
@@ -1658,8 +1741,8 @@
 
     .explore-region-card {
       position: relative;
-      flex: 0 0 215px;
-      min-width: 205px;
+      flex: 0 0 min(240px, 78vw);
+      min-width: 215px;
       scroll-snap-align: start;
       background: #FFFFFF;
       border: 1px solid #E2E8F0;
@@ -1672,6 +1755,12 @@
       box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
       transition: transform 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease;
       overflow: hidden;
+    }
+
+    @media (min-width: 640px) {
+      .explore-region-card {
+        flex: 0 0 235px;
+      }
     }
 
     @media (min-width: 1200px) {
@@ -1690,7 +1779,7 @@
 
     .explore-card-art {
       width: 100%;
-      height: 76px;
+      height: 150px;
       position: relative;
       overflow: hidden;
       display: flex;
@@ -1726,59 +1815,9 @@
       padding: 11px 12px 12px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: 10px;
       flex: 1;
-    }
-
-    .explore-card-top-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 4px;
-    }
-
-    .explore-region-kicker {
-      font-size: 8.5px;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: #0284C7;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .explore-duration-pill {
-      padding: 2px 6px;
-      border-radius: 9999px;
-      background-color: #FEF3C7;
-      border: 1px solid #FCD34D;
-      color: #92400E;
-      font-size: 8.5px;
-      font-weight: 800;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .explore-region-title {
-      margin-top: 4px;
-      font-family: 'Cinzel', Georgia, serif;
-      font-size: 13.5px;
-      font-weight: 800;
-      color: #0F172A;
-      line-height: 1.25;
-    }
-
-    .explore-region-desc {
-      margin-top: 5px;
-      font-size: 11px;
-      line-height: 1.42;
-      color: #475569;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
     }
 
     .explore-card-actions {
@@ -1786,8 +1825,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 6px;
-      padding-top: 8px;
-      border-top: 1px solid #F1F5F9;
+      padding-top: 4px;
     }
 
     .explore-region-cta {
@@ -1816,71 +1854,6 @@
     .explore-route-btn:hover {
       background-color: #065F46;
       color: #FFFFFF;
-    }
-
-    /* =========================================================================
-       ILLUSTRATED LANDMARKS FRIEZE BELOW CARDS & ABOVE FOOTER
-       ========================================================================= */
-    .landmark-frieze-wrap {
-      margin-top: 20px;
-      padding: 14px 12px 6px;
-      border-top: 1px dashed rgba(14, 116, 144, 0.25);
-    }
-
-    .landmark-frieze-strip {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      align-items: end;
-    }
-
-    @media (min-width: 640px) {
-      .landmark-frieze-strip {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-      }
-    }
-
-    @media (min-width: 1100px) {
-      .landmark-frieze-strip {
-        grid-template-columns: repeat(8, minmax(0, 1fr));
-        gap: 10px;
-      }
-    }
-
-    .landmark-illus-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 5px;
-      padding: 8px 6px 7px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.72);
-      border: 1px solid rgba(255, 255, 255, 0.9);
-      cursor: pointer;
-      transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    }
-
-    .landmark-illus-item:hover {
-      transform: translateY(-3px);
-      background: #FFFFFF;
-      border-color: #F59E0B;
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.1);
-    }
-
-    .landmark-illus-svg {
-      width: 100%;
-      max-width: 96px;
-      height: 62px;
-      display: block;
-    }
-
-    .landmark-illus-label {
-      font-size: 10px;
-      font-weight: 800;
-      color: #1E293B;
-      line-height: 1.2;
-      text-align: center;
     }
 
     /* Plan Next Trip Modal */
@@ -1993,9 +1966,12 @@
       position: relative;
       z-index: 25;
       width: 100%;
-      background: linear-gradient(180deg, #064E3B 0%, #022C22 100%);
-      color: #E2E8F0;
-      border-top: 3px solid #FBBF24;
+      background:
+        radial-gradient(ellipse at 12% 15%, rgba(56, 189, 248, 0.16) 0%, transparent 48%),
+        radial-gradient(ellipse at 88% 80%, rgba(251, 191, 36, 0.14) 0%, transparent 50%),
+        linear-gradient(180deg, #F8FAFC 0%, #EEF2F6 100%);
+      color: #1E293B;
+      border-top: 2px solid #CBD5E1;
       padding: 24px 20px 18px;
     }
 
@@ -2015,7 +1991,7 @@
       grid-template-columns: 1fr;
       gap: 20px;
       padding-bottom: 18px;
-      border-bottom: 1px solid rgba(167, 243, 208, 0.2);
+      border-bottom: 1px solid #CBD5E1;
     }
 
     @media (min-width: 640px) {
@@ -2031,28 +2007,75 @@
       }
     }
 
-    .footer-brand-name {
-      font-family: 'Cinzel', Georgia, serif;
-      font-size: 24px;
-      font-weight: 900;
-      color: #FFFFFF;
-      letter-spacing: -0.01em;
+    .footer-brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .footer-brand-tag {
-      margin-top: 4px;
-      font-size: 11px;
+    .footer-logo-lockup {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-end;
+      padding: 4px 8px 4px 2px;
+      border-radius: 0;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      flex-shrink: 0;
+    }
+
+    .footer-logo-wordmark {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #064E3B;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    @media (min-width: 640px) {
+      .footer-logo-wordmark {
+        font-size: 25px;
+      }
+    }
+
+    .footer-pin-dot-wrap {
+      position: relative;
+      display: inline-block;
+      line-height: 1;
+    }
+
+    .footer-pin-dot-svg {
+      position: absolute;
+      left: 50%;
+      top: -0.34em;
+      transform: translateX(-50%);
+      width: 0.44em;
+      height: 0.54em;
+      display: inline-block;
+      vertical-align: baseline;
+      filter: drop-shadow(0 1px 1.5px rgba(15, 23, 42, 0.25));
+    }
+
+    .footer-logo-sub {
+      margin-top: 3px;
+      font-size: 9px;
       font-weight: 800;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.11em;
       text-transform: uppercase;
-      color: #FBBF24;
+      color: #DC2626;
+      line-height: 1;
+      text-align: right;
+      white-space: nowrap;
     }
 
     .footer-brand-desc {
-      margin-top: 12px;
+      margin-top: 10px;
       font-size: 13px;
       line-height: 1.6;
-      color: #CBD5E1;
+      color: #475569;
       max-width: 380px;
     }
 
@@ -2062,7 +2085,7 @@
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: #FDE68A;
+      color: #064E3B;
       margin-bottom: 14px;
     }
 
@@ -2076,7 +2099,7 @@
     .footer-link-item {
       font-size: 13px;
       font-weight: 600;
-      color: #E2E8F0;
+      color: #334155;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -2085,14 +2108,14 @@
     }
 
     .footer-link-item:hover {
-      color: #FBBF24;
+      color: #065F46;
       transform: translateX(3px);
     }
 
     .footer-contact-row {
       font-size: 13px;
       line-height: 1.55;
-      color: #CBD5E1;
+      color: #475569;
       margin-bottom: 10px;
     }
 
@@ -2104,7 +2127,7 @@
       justify-content: space-between;
       gap: 10px;
       font-size: 12px;
-      color: #94A3B8;
+      color: #64748B;
       text-align: center;
     }
 
@@ -2116,7 +2139,7 @@
     }
 
     .footer-bottom-accent {
-      color: #FBBF24;
+      color: #065F46;
       font-weight: 700;
     }
 
@@ -2358,14 +2381,6 @@
               <span class="explore-card-art-badge">MH 12 • Sahyadri</span>
             </div>
             <div class="explore-card-content">
-              <div>
-                <div class="explore-card-top-row">
-                  <span class="explore-region-kicker">Sahyadri &amp; Forts</span>
-                  <span class="explore-duration-pill">2–3 Days</span>
-                </div>
-                <h3 class="explore-region-title">Pune &amp; Ghats</h3>
-                <p class="explore-region-desc">Sinhagad, Rajgad, Lonavala mists, Bhimashankar Jyotirlinga, and Karla-Bhaja caves.</p>
-              </div>
               <div class="explore-card-actions">
                 <span class="explore-region-cta">Explore ↗</span>
                 <button type="button" class="explore-route-btn" data-plan-dest="Pune">Plan Trip</button>
@@ -2383,14 +2398,6 @@
               <span class="explore-card-art-badge">MH 07 • Konkan</span>
             </div>
             <div class="explore-card-content">
-              <div>
-                <div class="explore-card-top-row">
-                  <span class="explore-region-kicker">Konkan Coast</span>
-                  <span class="explore-duration-pill">3–4 Days</span>
-                </div>
-                <h3 class="explore-region-title">Sindhudurg &amp; Tarkarli</h3>
-                <p class="explore-region-desc">Turquoise Malvan coral waters, sea forts, Amboli waterfalls, and coastal Konkani heritage.</p>
-              </div>
               <div class="explore-card-actions">
                 <span class="explore-region-cta">Explore ↗</span>
                 <button type="button" class="explore-route-btn" data-plan-dest="Sindhudurg">Plan Trip</button>
@@ -2408,14 +2415,6 @@
               <span class="explore-card-art-badge">MH 20 • UNESCO</span>
             </div>
             <div class="explore-card-content">
-              <div>
-                <div class="explore-card-top-row">
-                  <span class="explore-region-kicker">World Heritage</span>
-                  <span class="explore-duration-pill">2–3 Days</span>
-                </div>
-                <h3 class="explore-region-title">Ajanta &amp; Ellora</h3>
-                <p class="explore-region-desc">Monolithic Kailasa temple carvings, Daulatabad fort, and Grishneshwar Jyotirlinga.</p>
-              </div>
               <div class="explore-card-actions">
                 <span class="explore-region-cta">Explore ↗</span>
                 <button type="button" class="explore-route-btn" data-plan-dest="Chhatrapati Sambhajinagar">Plan Trip</button>
@@ -2434,14 +2433,6 @@
               <span class="explore-card-art-badge">MH 34 • Tadoba</span>
             </div>
             <div class="explore-card-content">
-              <div>
-                <div class="explore-card-top-row">
-                  <span class="explore-region-kicker">Wilderness</span>
-                  <span class="explore-duration-pill">3–4 Days</span>
-                </div>
-                <h3 class="explore-region-title">Tadoba Tiger Safari</h3>
-                <p class="explore-region-desc">Iconic Bengal tiger trails, teak forests, and serene lakefront wildlife sanctuaries.</p>
-              </div>
               <div class="explore-card-actions">
                 <span class="explore-region-cta">Explore ↗</span>
                 <button type="button" class="explore-route-btn" data-plan-dest="Chandrapur">Plan Trip</button>
@@ -2460,14 +2451,6 @@
               <span class="explore-card-art-badge">MH 11 • Highlands</span>
             </div>
             <div class="explore-card-content">
-              <div>
-                <div class="explore-card-top-row">
-                  <span class="explore-region-kicker">Highlands</span>
-                  <span class="explore-duration-pill">2–3 Days</span>
-                </div>
-                <h3 class="explore-region-title">Mahabaleshwar &amp; Kaas</h3>
-                <p class="explore-region-desc">Pratapgad Fort, UNESCO Kaas Valley of Flowers, Panchgani Table Land, and Thoseghar Falls.</p>
-              </div>
               <div class="explore-card-actions">
                 <span class="explore-region-cta">Explore ↗</span>
                 <button type="button" class="explore-route-btn" data-plan-dest="Satara">Plan Trip</button>
@@ -2487,14 +2470,6 @@
               <span class="explore-card-art-badge">MH 06 • Swarajya</span>
             </div>
             <div class="explore-card-content">
-              <div>
-                <div class="explore-card-top-row">
-                  <span class="explore-region-kicker">Capital &amp; Sea</span>
-                  <span class="explore-duration-pill">2 Days</span>
-                </div>
-                <h3 class="explore-region-title">Raigad &amp; Alibaug</h3>
-                <p class="explore-region-desc">Chhatrapati Shivaji Maharaj's Raigad capital, Murud-Janjira sea fort, and Kashid beaches.</p>
-              </div>
               <div class="explore-card-actions">
                 <span class="explore-region-cta">Explore ↗</span>
                 <button type="button" class="explore-route-btn" data-plan-dest="Raigad">Plan Trip</button>
@@ -2508,120 +2483,6 @@
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </button>
-      </div>
-
-      <!-- Illustrated Landmarks Strip Below Cards & Above Footer -->
-      <div class="landmark-frieze-wrap" aria-label="Maharashtra Landmarks Illustration">
-        <div class="landmark-frieze-strip">
-          <!-- Gateway of India, Mumbai -->
-          <div class="landmark-illus-item" data-jump-district="mumbai_city" title="Mumbai • Gateway of India">
-            <svg class="landmark-illus-svg" viewBox="0 0 120 76" aria-hidden="true">
-              <rect x="14" y="22" width="92" height="50" fill="#FDE68A" stroke="#334155" stroke-width="1.4"/>
-              <rect x="14" y="17" width="92" height="6" fill="#EA580C" stroke="#334155" stroke-width="1.3"/>
-              <rect x="22" y="9" width="12" height="8" fill="#FBBF24" stroke="#334155" stroke-width="1.2"/>
-              <circle cx="28" cy="7" r="3.5" fill="#EA580C" stroke="#334155" stroke-width="1.1"/>
-              <rect x="86" y="9" width="12" height="8" fill="#FBBF24" stroke="#334155" stroke-width="1.2"/>
-              <circle cx="92" cy="7" r="3.5" fill="#EA580C" stroke="#334155" stroke-width="1.1"/>
-              <path d="M 42 72 L 42 42 Q 60 26 78 42 L 78 72 Z" fill="#F8FAFC" stroke="#334155" stroke-width="1.4"/>
-              <path d="M 20 72 L 20 48 Q 28 40 36 48 L 36 72 Z" fill="#EA580C" opacity="0.85" stroke="#334155" stroke-width="1.1"/>
-              <path d="M 84 72 L 84 48 Q 92 40 100 48 L 100 72 Z" fill="#EA580C" opacity="0.85" stroke="#334155" stroke-width="1.1"/>
-              <line x1="8" y1="72" x2="112" y2="72" stroke="#334155" stroke-width="1.6"/>
-            </svg>
-            <span class="landmark-illus-label">Mumbai • Gate of India</span>
-          </div>
-
-          <!-- Buddha & Deekshabhoomi, Nagpur -->
-          <div class="landmark-illus-item" data-jump-district="nagpur" title="Nagpur • Buddha & Deekshabhoomi">
-            <svg class="landmark-illus-svg" viewBox="0 0 120 76" aria-hidden="true">
-              <circle cx="60" cy="21" r="8.5" fill="#FDE68A" stroke="#334155" stroke-width="1.3"/>
-              <path d="M 52 16 Q 60 8 68 16" fill="#EA580C" stroke="#334155" stroke-width="1.2"/>
-              <path d="M 38 62 C 38 40 46 31 60 31 C 74 31 82 40 82 62 Z" fill="#FDE68A" stroke="#334155" stroke-width="1.4"/>
-              <path d="M 46 46 Q 60 54 74 46" fill="none" stroke="#EA580C" stroke-width="1.5"/>
-              <rect x="30" y="62" width="60" height="5" rx="1.5" fill="#FBBF24" stroke="#334155" stroke-width="1.2"/>
-              <rect x="24" y="67" width="72" height="5" rx="1.5" fill="#EA580C" stroke="#334155" stroke-width="1.2"/>
-            </svg>
-            <span class="landmark-illus-label">Buddha &amp; Deekshabhoomi</span>
-          </div>
-
-          <!-- Raigad Fort -->
-          <div class="landmark-illus-item" data-jump-district="raigad" title="Raigad • Swarajya Fort">
-            <svg class="landmark-illus-svg" viewBox="0 0 120 76" aria-hidden="true">
-              <polygon points="10,72 34,34 60,46 86,28 110,72" fill="#FBBF24" stroke="#334155" stroke-width="1.4"/>
-              <polygon points="34,34 48,52 22,72 10,72" fill="#EA580C" opacity="0.78" stroke="#334155" stroke-width="1.2"/>
-              <rect x="78" y="18" width="16" height="12" fill="#FDE68A" stroke="#334155" stroke-width="1.2"/>
-              <line x1="82" y1="18" x2="82" y2="7" stroke="#334155" stroke-width="1.5"/>
-              <polygon points="82,7 94,10.5 82,14" fill="#EA580C" stroke="#334155" stroke-width="1"/>
-              <line x1="8" y1="72" x2="112" y2="72" stroke="#334155" stroke-width="1.6"/>
-            </svg>
-            <span class="landmark-illus-label">Raigad • Shivaji Maharaj</span>
-          </div>
-
-          <!-- Shaniwar Wada, Pune -->
-          <div class="landmark-illus-item" data-jump-district="pune" title="Pune • Shaniwar Wada">
-            <svg class="landmark-illus-svg" viewBox="0 0 120 76" aria-hidden="true">
-              <rect x="26" y="28" width="68" height="44" fill="#FDE68A" stroke="#334155" stroke-width="1.4"/>
-              <rect x="18" y="20" width="14" height="52" fill="#EA580C" stroke="#334155" stroke-width="1.3"/>
-              <rect x="88" y="20" width="14" height="52" fill="#EA580C" stroke="#334155" stroke-width="1.3"/>
-              <polygon points="16,20 25,10 34,20" fill="#FBBF24" stroke="#334155" stroke-width="1.2"/>
-              <polygon points="86,20 95,10 104,20" fill="#FBBF24" stroke="#334155" stroke-width="1.2"/>
-              <path d="M 46 72 L 46 46 Q 60 34 74 46 L 74 72 Z" fill="#92400E" stroke="#334155" stroke-width="1.3"/>
-              <line x1="10" y1="72" x2="110" y2="72" stroke="#334155" stroke-width="1.6"/>
-            </svg>
-            <span class="landmark-illus-label">Shaniwar Wada &amp; Dr. Ambedkar</span>
-          </div>
-
-          <!-- Shivneri Fort, Junnar -->
-          <div class="landmark-illus-item" data-jump-district="pune" title="Shivneri Fort & Forts">
-            <svg class="landmark-illus-svg" viewBox="0 0 120 76" aria-hidden="true">
-              <polygon points="12,72 32,42 52,50 72,26 92,46 108,72" fill="#FDE68A" stroke="#334155" stroke-width="1.4"/>
-              <polygon points="72,26 84,48 64,72 52,50" fill="#EA580C" opacity="0.72" stroke="#334155" stroke-width="1.1"/>
-              <rect x="66" y="18" width="12" height="8" fill="#FBBF24" stroke="#334155" stroke-width="1.1"/>
-              <line x1="69" y1="18" x2="69" y2="9" stroke="#334155" stroke-width="1.4"/>
-              <polygon points="69,9 79,11.5 69,14" fill="#EA580C" stroke="#334155" stroke-width="0.9"/>
-              <line x1="10" y1="72" x2="110" y2="72" stroke="#334155" stroke-width="1.6"/>
-            </svg>
-            <span class="landmark-illus-label">Shivneri &amp; Forts</span>
-          </div>
-
-          <!-- Bibi Ka Maqbara, Chhatrapati Sambhajinagar -->
-          <div class="landmark-illus-item" data-jump-district="chhatrapati_sambhajinagar" title="Bibi Ka Maqbara">
-            <svg class="landmark-illus-svg" viewBox="0 0 120 76" aria-hidden="true">
-              <rect x="36" y="34" width="48" height="38" fill="#FDE68A" stroke="#334155" stroke-width="1.3"/>
-              <path d="M 46 34 C 46 17 74 17 74 34 Z" fill="#FBBF24" stroke="#334155" stroke-width="1.3"/>
-              <rect x="20" y="22" width="6" height="50" fill="#FDE68A" stroke="#334155" stroke-width="1.2"/>
-              <circle cx="23" cy="20" r="3" fill="#EA580C" stroke="#334155" stroke-width="1"/>
-              <rect x="94" y="22" width="6" height="50" fill="#FDE68A" stroke="#334155" stroke-width="1.2"/>
-              <circle cx="97" cy="20" r="3" fill="#EA580C" stroke="#334155" stroke-width="1"/>
-              <path d="M 52 72 L 52 52 Q 60 44 68 52 L 68 72 Z" fill="#EA580C" opacity="0.55" stroke="#334155" stroke-width="1.1"/>
-              <line x1="14" y1="72" x2="106" y2="72" stroke="#334155" stroke-width="1.6"/>
-            </svg>
-            <span class="landmark-illus-label">Bibi Ka Maqbara</span>
-          </div>
-
-          <!-- Shirdi Temple -->
-          <div class="landmark-illus-item" data-jump-district="ahilyanagar" title="Shirdi Temple">
-            <svg class="landmark-illus-svg" viewBox="0 0 120 76" aria-hidden="true">
-              <rect x="28" y="42" width="64" height="30" fill="#FDE68A" stroke="#334155" stroke-width="1.3"/>
-              <polygon points="34,42 60,14 86,42" fill="#EA580C" stroke="#334155" stroke-width="1.4"/>
-              <line x1="60" y1="14" x2="60" y2="6" stroke="#334155" stroke-width="1.5"/>
-              <circle cx="60" cy="6" r="2.5" fill="#FBBF24" stroke="#334155" stroke-width="1"/>
-              <path d="M 50 72 L 50 54 Q 60 46 70 54 L 70 72 Z" fill="#FBBF24" stroke="#334155" stroke-width="1.2"/>
-              <line x1="16" y1="72" x2="104" y2="72" stroke="#334155" stroke-width="1.6"/>
-            </svg>
-            <span class="landmark-illus-label">Shirdi Temple</span>
-          </div>
-
-          <!-- Sahyadri Hills -->
-          <div class="landmark-illus-item" data-jump-district="satara" title="Sahyadri Hills">
-            <svg class="landmark-illus-svg" viewBox="0 0 120 76" aria-hidden="true">
-              <circle cx="92" cy="18" r="9" fill="#FBBF24" stroke="#334155" stroke-width="1.2"/>
-              <polygon points="10,72 38,32 64,54 88,28 112,72" fill="#FDE68A" stroke="#334155" stroke-width="1.4"/>
-              <polygon points="38,32 52,54 28,72 10,72" fill="#EA580C" opacity="0.65" stroke="#334155" stroke-width="1.1"/>
-              <line x1="8" y1="72" x2="112" y2="72" stroke="#334155" stroke-width="1.6"/>
-            </svg>
-            <span class="landmark-illus-label">Sahyadri Hills</span>
-          </div>
-        </div>
       </div>
     </div>
   </section>
@@ -2662,8 +2523,12 @@
     <div class="footer-inner">
       <div class="footer-grid">
         <div>
-          <div class="footer-brand-name">The Sahyadri Safari</div>
-          <div class="footer-brand-tag">Tour N Travaller • Maharashtra</div>
+          <div class="footer-brand-row">
+            <div class="footer-logo-lockup" aria-label="Sahyadri Safari Tour N Traveller">
+              <span class="footer-logo-wordmark">Sahyadri Safar<span class="footer-pin-dot-wrap">&#305;<svg class="footer-pin-dot-svg" viewBox="0 0 100 132" aria-hidden="true"><defs><linearGradient id="footerRedPinGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#EF4444"/><stop offset="55%" stop-color="#DC2626"/><stop offset="100%" stop-color="#991B1B"/></linearGradient></defs><path d="M50 4 C23 4 4 23 4 48 C4 76 36 102 50 122 C64 102 96 76 96 48 C96 23 77 4 50 4 Z" fill="url(#footerRedPinGrad)"/><path d="M50 4 C77 4 96 23 96 48 C96 76 64 102 50 122 Z" fill="#000000" opacity="0.14"/><circle cx="50" cy="48" r="24" fill="none" stroke="#FFFFFF" stroke-width="9"/><circle cx="50" cy="48" r="14" fill="#DC2626"/><ellipse cx="50" cy="128" rx="22" ry="3.5" fill="none" stroke="#DC2626" stroke-width="2.2"/><circle cx="50" cy="128" r="3" fill="#DC2626"/></svg></span></span>
+              <span class="footer-logo-sub">Tour N Travaller</span>
+            </div>
+          </div>
           <p class="footer-brand-desc">
             Curated road expeditions, fort treks, Konkan coastal escapes, UNESCO cave trails, and wildlife safaris across all 36 districts of Maharashtra.
           </p>
@@ -3311,97 +3176,6 @@
         </svg>
       </div>`;
 
-    const RE_SCRAM_BIKE_SVG = `
-      <div class="vehicle-wrapper">
-        <svg viewBox="0 0 155 86" class="svg-bike" aria-label="Royal Enfield Scram 440 Motorcycle">
-          <defs>
-            <linearGradient id="scramBeam" x1="0%" y1="50%" x2="100%" y2="50%">
-              <stop offset="0%" stop-color="rgba(254, 249, 195, 0.85)"/>
-              <stop offset="100%" stop-color="rgba(254, 249, 195, 0)"/>
-            </linearGradient>
-          </defs>
-          <polygon points="118,30 166,22 166,46" fill="url(#scramBeam)"/>
-          <ellipse cx="76" cy="79" rx="58" ry="4" fill="rgba(2, 6, 23, 0.72)"/>
-          <g class="kombi-wheel">
-            <circle cx="34" cy="64" r="14.5" fill="none" stroke="#0F172A" stroke-width="5.2"/>
-            <circle cx="34" cy="64" r="11.8" fill="none" stroke="#EF4444" stroke-width="0.9"/>
-            <circle cx="34" cy="64" r="9.5" fill="none" stroke="#94A3B8" stroke-width="0.7" stroke-dasharray="2 2"/>
-            <circle cx="34" cy="64" r="4.2" fill="#334155" stroke="#CBD5E1" stroke-width="1"/>
-          </g>
-          <g class="kombi-wheel">
-            <circle cx="122" cy="64" r="15" fill="none" stroke="#0F172A" stroke-width="4.8"/>
-            <circle cx="122" cy="64" r="12.4" fill="none" stroke="#EF4444" stroke-width="0.9"/>
-            <circle cx="122" cy="64" r="9.8" fill="none" stroke="#94A3B8" stroke-width="0.7" stroke-dasharray="2 2"/>
-            <circle cx="122" cy="64" r="4.2" fill="#334155" stroke="#CBD5E1" stroke-width="1"/>
-          </g>
-          <g class="kombi-body-bounce">
-            <line x1="34" y1="64" x2="64" y2="56" stroke="#334155" stroke-width="3.2" stroke-linecap="round"/>
-            <path d="M 14 36 L 38 38 L 46 43 L 18 41 Z" fill="#F8FAFC" stroke="#94A3B8" stroke-width="0.7"/>
-            <rect x="13" y="36.5" width="3" height="2.8" rx="0.8" fill="#EF4444"/>
-            <rect x="58" y="42" width="22" height="17" rx="3" fill="#1E293B" stroke="#0F172A" stroke-width="1"/>
-            <circle cx="66" cy="52" r="4.2" fill="#334155" stroke="#94A3B8" stroke-width="0.8"/>
-            <path d="M 80 45 C 88 45 87 59 78 60 L 52 60 L 24 49 L 28 45 L 54 56" fill="none" stroke="#CBD5E1" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <polygon points="50,56 23,46 26,41 53,52" fill="#1E293B" stroke="#94A3B8" stroke-width="0.8"/>
-            <polygon points="48,39 63,39 60,48 49,47" fill="#F8FAFC" stroke="#94A3B8" stroke-width="0.7"/>
-            <path d="M 24 35 L 44 35 C 50 35 54 38 64 38 L 65 41 L 26 39 Z" fill="#0F172A"/>
-            <path d="M 63 38 C 65 27 76 23 89 24 L 94 37 L 63 38 Z" fill="#F8FAFC" stroke="#64748B" stroke-width="0.8"/>
-            <path d="M 82 24 L 90 24.5 L 94 37 L 82 37 Z" fill="#0F2942"/>
-            <rect x="64" y="34" width="29" height="2.6" fill="#DC2626"/>
-            <rect x="87" y="29" width="9" height="7" rx="1.5" fill="#0F2942" stroke="#38BDF8" stroke-width="0.5"/>
-            <line x1="99" y1="24" x2="122" y2="64" stroke="#1E293B" stroke-width="3.4" stroke-linecap="round"/>
-            <path d="M 107 45 C 114 43 122 44 127 47" fill="none" stroke="#F8FAFC" stroke-width="2.6" stroke-linecap="round"/>
-            <rect x="108" y="24" width="6.5" height="8.5" rx="2" fill="#F8FAFC" stroke="#475569" stroke-width="0.8"/>
-            <circle cx="114.5" cy="28.2" r="2.5" fill="#FEF9C3"/>
-            <line x1="96" y1="14" x2="102" y2="23" stroke="#0F172A" stroke-width="1.6"/>
-            <ellipse cx="96" cy="13" rx="2.2" ry="3.5" fill="#1E293B"/>
-          </g>
-        </svg>
-      </div>`;
-
-    const YAMAHA_XSR_BIKE_SVG = `
-      <div class="vehicle-wrapper">
-        <svg viewBox="0 0 155 86" class="svg-bike" aria-label="Yamaha XSR 155 Retro Roadster">
-          <defs>
-            <linearGradient id="xsrBeam" x1="0%" y1="50%" x2="100%" y2="50%">
-              <stop offset="0%" stop-color="rgba(254, 249, 195, 0.85)"/>
-              <stop offset="100%" stop-color="rgba(254, 249, 195, 0)"/>
-            </linearGradient>
-          </defs>
-          <polygon points="118,30 166,22 166,46" fill="url(#xsrBeam)"/>
-          <ellipse cx="76" cy="79" rx="58" ry="4" fill="rgba(2, 6, 23, 0.72)"/>
-          <g class="kombi-wheel">
-            <circle cx="34" cy="64" r="14.5" fill="none" stroke="#0F172A" stroke-width="5.4"/>
-            <circle cx="34" cy="64" r="9.5" fill="none" stroke="#64748B" stroke-width="1.2" stroke-dasharray="3 2.5"/>
-            <circle cx="34" cy="64" r="4" fill="#1E293B" stroke="#CBD5E1" stroke-width="0.9"/>
-          </g>
-          <g class="kombi-wheel">
-            <circle cx="122" cy="64" r="14.5" fill="none" stroke="#0F172A" stroke-width="5"/>
-            <circle cx="122" cy="64" r="9.5" fill="none" stroke="#64748B" stroke-width="1.2" stroke-dasharray="3 2.5"/>
-            <circle cx="122" cy="64" r="6.2" fill="none" stroke="#E2E8F0" stroke-width="1.3"/>
-            <circle cx="122" cy="64" r="3.8" fill="#1E293B"/>
-          </g>
-          <g class="kombi-body-bounce">
-            <line x1="34" y1="64" x2="64" y2="57" stroke="#1E293B" stroke-width="3.6" stroke-linecap="round"/>
-            <path d="M 18 36 L 34 38 L 32 41 L 16 39 Z" fill="#F8FAFC"/>
-            <circle cx="21" cy="34.5" r="2.2" fill="#DC2626" stroke="#0F172A" stroke-width="0.7"/>
-            <rect x="60" y="40" width="23" height="20" rx="3" fill="#0F172A"/>
-            <circle cx="69" cy="52" r="4.5" fill="#1E293B" stroke="#475569" stroke-width="0.9"/>
-            <polygon points="56,59 27,51 30,45 59,54" fill="#1E293B" stroke="#475569" stroke-width="0.7"/>
-            <polygon points="44,39 58,39 55,44 45,43" fill="#CBD5E1"/>
-            <rect x="26" y="33" width="38" height="5.5" rx="2.5" fill="#1E293B" stroke="#0F172A" stroke-width="0.8"/>
-            <path d="M 63 38 C 64 26 77 22 93 25 C 97 27 97 34 92 38 Z" fill="#F8FAFC" stroke="#64748B" stroke-width="0.8"/>
-            <path d="M 66 28 C 73 22 86 22 94 26 L 91 28 C 83 25 73 25 66 29 Z" fill="#DC2626"/>
-            <line x1="101" y1="24" x2="115" y2="49" stroke="#EAB308" stroke-width="4" stroke-linecap="round"/>
-            <line x1="115" y1="49" x2="122" y2="64" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round"/>
-            <path d="M 106 47 C 112 43 121 43 128 47" fill="none" stroke="#DC2626" stroke-width="3.2" stroke-linecap="round"/>
-            <rect x="108" y="24" width="6.5" height="8" rx="2" fill="#0F172A"/>
-            <circle cx="114.5" cy="28" r="2.5" fill="#FEF9C3"/>
-            <line x1="98" y1="13" x2="103" y2="23" stroke="#0F172A" stroke-width="1.6"/>
-            <ellipse cx="98" cy="12" rx="2.2" ry="3.6" fill="#1E293B"/>
-          </g>
-        </svg>
-      </div>`;
-
     const MSRTC_LAL_PARI_BUS_SVG = `
       <div class="vehicle-wrapper">
         <svg viewBox="0 0 245 84" class="svg-msrtc" aria-label="MSRTC Lal Pari Maharashtra State Transport Bus">
@@ -3420,12 +3194,9 @@
               <stop offset="100%" stop-color="rgba(254, 249, 195, 0)"/>
             </linearGradient>
           </defs>
-          <!-- Headlight Beam -->
           <polygon points="228,53 282,40 282,69" fill="url(#msrtcBeam)"/>
-          <!-- Road Contact Shadow -->
           <ellipse cx="120" cy="77" rx="108" ry="4.5" fill="rgba(2, 6, 23, 0.78)"/>
           <g class="kombi-body-bounce">
-            <!-- Roof Luggage Carrier & Roll -->
             <rect x="24" y="6" width="176" height="3.2" rx="1.2" fill="#475569"/>
             <line x1="36" y1="6" x2="36" y2="11" stroke="#334155" stroke-width="1.5"/>
             <line x1="78" y1="6" x2="78" y2="11" stroke="#334155" stroke-width="1.5"/>
@@ -3435,19 +3206,15 @@
             <rect x="44" y="2.5" width="42" height="4.2" rx="1.6" fill="#0284C7" stroke="#0F172A" stroke-width="0.6"/>
             <rect x="94" y="3" width="28" height="3.8" rx="1.4" fill="#D97706" stroke="#0F172A" stroke-width="0.6"/>
 
-            <!-- Main Bus Body Shell -->
             <path d="M 12 63 L 12 16 C 12 12 15 10 20 10 L 216 10 C 222 10 226 13 227 19 L 230 43 L 230 63 L 204 63 C 204 51 182 51 182 63 L 68 63 C 68 51 46 51 46 63 L 12 63 Z" fill="url(#msrtcRedPaint)" stroke="#7F1D1D" stroke-width="1"/>
 
-            <!-- Signature MSRTC Cream & Yellow Livery Stripe -->
             <rect x="12.5" y="35" width="217" height="10" fill="url(#msrtcCreamBand)"/>
             <rect x="12.5" y="34" width="217" height="1.6" fill="#FACC15"/>
             <rect x="12.5" y="45" width="217" height="1.6" fill="#FACC15"/>
 
-            <!-- Front Destination Board -->
             <rect x="198" y="12.5" width="24" height="5.5" rx="1.2" fill="#0F172A" stroke="#FACC15" stroke-width="0.6"/>
             <text x="210" y="16.5" text-anchor="middle" font-size="3.9" font-weight="900" fill="#FDE047" letter-spacing="0.2">पुणे • PUNE</text>
 
-            <!-- Passenger Sliding Windows -->
             <g fill="#1E293B" stroke="#E2E8F0" stroke-width="0.9">
               <rect x="18" y="17" width="26" height="15" rx="2"/>
               <rect x="48" y="17" width="26" height="15" rx="2"/>
@@ -3456,7 +3223,6 @@
               <rect x="138" y="17" width="26" height="15" rx="2"/>
               <rect x="168" y="17" width="23" height="15" rx="2"/>
             </g>
-            <!-- Glass Tint Reflections -->
             <g fill="#BAE6FD" opacity="0.82">
               <rect x="19.2" y="18.2" width="23.6" height="12.6" rx="1.2"/>
               <rect x="49.2" y="18.2" width="23.6" height="12.6" rx="1.2"/>
@@ -3466,33 +3232,27 @@
               <rect x="169.2" y="18.2" width="20.6" height="12.6" rx="1.2"/>
             </g>
 
-            <!-- Front Passenger Entry Door & Windshield -->
             <rect x="195" y="19.5" width="16" height="41" rx="1.8" fill="#1E293B" stroke="#F8FAFC" stroke-width="1"/>
             <rect x="197" y="21.5" width="5.2" height="18" rx="0.8" fill="#E0F2FE" opacity="0.88"/>
             <rect x="203.8" y="21.5" width="5.2" height="18" rx="0.8" fill="#E0F2FE" opacity="0.88"/>
             <path d="M 215 19.5 L 225.5 19.5 L 228 34 L 215 34 Z" fill="#E0F2FE" stroke="#0F172A" stroke-width="1"/>
 
-            <!-- Side Mirror -->
             <path d="M 225 21 L 233 21 L 233 28" fill="none" stroke="#0F172A" stroke-width="1.3"/>
             <rect x="231" y="24" width="3.5" height="6.5" rx="1" fill="#0F172A"/>
 
-            <!-- MSRTC Branding on Cream Band -->
             <text x="104" y="42.4" text-anchor="middle" font-size="6.8" font-weight="900" fill="#991B1B" letter-spacing="0.9">MSRTC • लाल परी</text>
 
-            <!-- Headlight, Bumper & Tail Light -->
             <rect x="226" y="49" width="4.5" height="7" rx="1.2" fill="#FEF9C3" stroke="#CA8A04" stroke-width="0.8"/>
             <rect x="11.5" y="48" width="3" height="8" rx="0.8" fill="#FBBF24" stroke="#7F1D1D" stroke-width="0.5"/>
             <rect x="8" y="61" width="10" height="4" rx="1.5" fill="#1E293B" stroke="#94A3B8" stroke-width="0.7"/>
             <rect x="222" y="61" width="11" height="4" rx="1.5" fill="#1E293B" stroke="#94A3B8" stroke-width="0.7"/>
           </g>
 
-          <!-- Rear Heavy Bus Wheel -->
           <g class="kombi-wheel">
             <circle cx="57" cy="64" r="12" fill="#0F172A" stroke="#1E293B" stroke-width="1.6"/>
             <circle cx="57" cy="64" r="7.2" fill="#E2E8F0" stroke="#64748B" stroke-width="1"/>
             <circle cx="57" cy="64" r="3.4" fill="#DC2626"/>
           </g>
-          <!-- Front Heavy Bus Wheel -->
           <g class="kombi-wheel">
             <circle cx="193" cy="64" r="12" fill="#0F172A" stroke="#1E293B" stroke-width="1.6"/>
             <circle cx="193" cy="64" r="7.2" fill="#E2E8F0" stroke="#64748B" stroke-width="1"/>
@@ -3501,29 +3261,274 @@
         </svg>
       </div>`;
 
+    const MSRTC_SHIVSHAHI_COACH_SVG = `
+      <div class="vehicle-wrapper">
+        <svg viewBox="0 0 245 84" class="svg-msrtc" aria-label="MSRTC Shivshahi White AC Coach">
+          <defs>
+            <linearGradient id="shivshahiWhite" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#FFFFFF"/>
+              <stop offset="100%" stop-color="#E2E8F0"/>
+            </linearGradient>
+            <linearGradient id="shivshahiBlueStripe" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#1D4ED8"/>
+              <stop offset="50%" stop-color="#0284C7"/>
+              <stop offset="100%" stop-color="#EA580C"/>
+            </linearGradient>
+            <linearGradient id="shivshahiBeam" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stop-color="rgba(254, 249, 195, 0.85)"/>
+              <stop offset="100%" stop-color="rgba(254, 249, 195, 0)"/>
+            </linearGradient>
+          </defs>
+          <polygon points="228,53 282,40 282,69" fill="url(#shivshahiBeam)"/>
+          <ellipse cx="120" cy="77" rx="108" ry="4.5" fill="rgba(2, 6, 23, 0.78)"/>
+          <g class="kombi-body-bounce">
+            <rect x="62" y="5" width="44" height="5" rx="2" fill="#CBD5E1" stroke="#475569" stroke-width="0.8"/>
+            <rect x="138" y="5" width="44" height="5" rx="2" fill="#CBD5E1" stroke="#475569" stroke-width="0.8"/>
+            <path d="M 12 63 L 12 15 C 12 11 16 10 22 10 L 216 10 C 223 10 227 13 228 19 L 231 44 L 231 63 L 204 63 C 204 51 182 51 182 63 L 68 63 C 68 51 46 51 46 63 L 12 63 Z" fill="url(#shivshahiWhite)" stroke="#64748B" stroke-width="1"/>
+            <rect x="12.5" y="37" width="218" height="7" fill="url(#shivshahiBlueStripe)"/>
+            <g fill="#0F172A" stroke="#334155" stroke-width="0.9">
+              <rect x="20" y="16" width="28" height="16" rx="2.5"/>
+              <rect x="52" y="16" width="28" height="16" rx="2.5"/>
+              <rect x="84" y="16" width="28" height="16" rx="2.5"/>
+              <rect x="116" y="16" width="28" height="16" rx="2.5"/>
+              <rect x="148" y="16" width="28" height="16" rx="2.5"/>
+            </g>
+            <g fill="#38BDF8" opacity="0.45">
+              <rect x="21.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+              <rect x="53.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+              <rect x="85.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+              <rect x="117.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+              <rect x="149.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+            </g>
+            <rect x="184" y="16" width="15" height="44" rx="1.5" fill="#1E293B" stroke="#475569" stroke-width="0.9"/>
+            <rect x="186" y="18" width="11" height="22" rx="1" fill="#BAE6FD" opacity="0.7"/>
+            <path d="M 205 16 L 222 16 L 226 35 L 205 35 Z" fill="#1E293B" stroke="#475569" stroke-width="1"/>
+            <path d="M 206.5 17.5 L 220.5 17.5 L 224 33.5 L 206.5 33.5 Z" fill="#7DD3FC" opacity="0.65"/>
+            <text x="102" y="42.8" text-anchor="middle" font-size="6.2" font-weight="900" fill="#FFFFFF" letter-spacing="0.8">MSRTC • शिवशाही AC</text>
+            <rect x="227" y="48" width="4" height="7" rx="1.2" fill="#FEF9C3" stroke="#CA8A04" stroke-width="0.8"/>
+            <rect x="11.5" y="48" width="3" height="8" rx="0.8" fill="#EF4444"/>
+            <rect x="8" y="61" width="10" height="4" rx="1.5" fill="#334155"/>
+            <rect x="223" y="61" width="11" height="4" rx="1.5" fill="#334155"/>
+          </g>
+          <g class="kombi-wheel">
+            <circle cx="57" cy="64" r="12" fill="#0F172A" stroke="#1E293B" stroke-width="1.6"/>
+            <circle cx="57" cy="64" r="7.2" fill="#E2E8F0" stroke="#64748B" stroke-width="1"/>
+            <circle cx="57" cy="64" r="3.4" fill="#1D4ED8"/>
+          </g>
+          <g class="kombi-wheel">
+            <circle cx="193" cy="64" r="12" fill="#0F172A" stroke="#1E293B" stroke-width="1.6"/>
+            <circle cx="193" cy="64" r="7.2" fill="#E2E8F0" stroke="#64748B" stroke-width="1"/>
+            <circle cx="193" cy="64" r="3.4" fill="#1D4ED8"/>
+          </g>
+        </svg>
+      </div>`;
+
+    const MSRTC_SHIVNERI_COACH_SVG = `
+      <div class="vehicle-wrapper">
+        <svg viewBox="0 0 245 84" class="svg-msrtc" aria-label="MSRTC Shivneri Volvo AC Coach">
+          <defs>
+            <linearGradient id="shivneriSilver" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#F8FAFC"/>
+              <stop offset="100%" stop-color="#CBD5E1"/>
+            </linearGradient>
+            <linearGradient id="shivneriBeam" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stop-color="rgba(254, 249, 195, 0.85)"/>
+              <stop offset="100%" stop-color="rgba(254, 249, 195, 0)"/>
+            </linearGradient>
+          </defs>
+          <polygon points="228,53 282,40 282,69" fill="url(#shivneriBeam)"/>
+          <ellipse cx="120" cy="77" rx="108" ry="4.5" fill="rgba(2, 6, 23, 0.78)"/>
+          <g class="kombi-body-bounce">
+            <rect x="66" y="5" width="46" height="5" rx="2" fill="#94A3B8" stroke="#334155" stroke-width="0.8"/>
+            <rect x="142" y="5" width="46" height="5" rx="2" fill="#94A3B8" stroke="#334155" stroke-width="0.8"/>
+            <path d="M 12 63 L 12 15 C 12 11 16 10 22 10 L 216 10 C 223 10 227 13 228 19 L 231 44 L 231 63 L 204 63 C 204 51 182 51 182 63 L 68 63 C 68 51 46 51 46 63 L 12 63 Z" fill="url(#shivneriSilver)" stroke="#475569" stroke-width="1"/>
+            <rect x="12.5" y="36.5" width="218" height="8" fill="#0F172A"/>
+            <rect x="12.5" y="44.5" width="218" height="2" fill="#DC2626"/>
+            <g fill="#0F172A" stroke="#334155" stroke-width="0.9">
+              <rect x="20" y="16" width="28" height="16" rx="2.5"/>
+              <rect x="52" y="16" width="28" height="16" rx="2.5"/>
+              <rect x="84" y="16" width="28" height="16" rx="2.5"/>
+              <rect x="116" y="16" width="28" height="16" rx="2.5"/>
+              <rect x="148" y="16" width="28" height="16" rx="2.5"/>
+            </g>
+            <g fill="#93C5FD" opacity="0.42">
+              <rect x="21.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+              <rect x="53.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+              <rect x="85.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+              <rect x="117.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+              <rect x="149.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+            </g>
+            <rect x="184" y="16" width="15" height="44" rx="1.5" fill="#1E293B" stroke="#475569" stroke-width="0.9"/>
+            <rect x="186" y="18" width="11" height="22" rx="1" fill="#BAE6FD" opacity="0.7"/>
+            <path d="M 205 16 L 222 16 L 226 35 L 205 35 Z" fill="#1E293B" stroke="#475569" stroke-width="1"/>
+            <path d="M 206.5 17.5 L 220.5 17.5 L 224 33.5 L 206.5 33.5 Z" fill="#7DD3FC" opacity="0.65"/>
+            <text x="102" y="42.6" text-anchor="middle" font-size="6.2" font-weight="900" fill="#F8FAFC" letter-spacing="0.9">MSRTC • शिवनेरी VOLVO</text>
+            <rect x="227" y="48" width="4" height="7" rx="1.2" fill="#FEF9C3" stroke="#CA8A04" stroke-width="0.8"/>
+            <rect x="11.5" y="48" width="3" height="8" rx="0.8" fill="#EF4444"/>
+            <rect x="8" y="61" width="10" height="4" rx="1.5" fill="#1E293B"/>
+            <rect x="223" y="61" width="11" height="4" rx="1.5" fill="#1E293B"/>
+          </g>
+          <g class="kombi-wheel">
+            <circle cx="57" cy="64" r="12" fill="#0F172A" stroke="#1E293B" stroke-width="1.6"/>
+            <circle cx="57" cy="64" r="7.2" fill="#E2E8F0" stroke="#64748B" stroke-width="1"/>
+            <circle cx="57" cy="64" r="3.4" fill="#334155"/>
+          </g>
+          <g class="kombi-wheel">
+            <circle cx="193" cy="64" r="12" fill="#0F172A" stroke="#1E293B" stroke-width="1.6"/>
+            <circle cx="193" cy="64" r="7.2" fill="#E2E8F0" stroke="#64748B" stroke-width="1"/>
+            <circle cx="193" cy="64" r="3.4" fill="#334155"/>
+          </g>
+        </svg>
+      </div>`;
+
+    const MSRTC_HIRKANI_BUS_SVG = `
+      <div class="vehicle-wrapper">
+        <svg viewBox="0 0 245 84" class="svg-msrtc" aria-label="MSRTC Hirkani Semi-Luxury Bus">
+          <defs>
+            <linearGradient id="hirkaniPurple" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#9333EA"/>
+              <stop offset="100%" stop-color="#6B21A8"/>
+            </linearGradient>
+            <linearGradient id="hirkaniBeam" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stop-color="rgba(254, 249, 195, 0.85)"/>
+              <stop offset="100%" stop-color="rgba(254, 249, 195, 0)"/>
+            </linearGradient>
+          </defs>
+          <polygon points="228,53 282,40 282,69" fill="url(#hirkaniBeam)"/>
+          <ellipse cx="120" cy="77" rx="108" ry="4.5" fill="rgba(2, 6, 23, 0.78)"/>
+          <g class="kombi-body-bounce">
+            <rect x="28" y="6.5" width="168" height="3" rx="1.2" fill="#64748B"/>
+            <path d="M 12 63 L 12 16 C 12 12 15 10 20 10 L 216 10 C 222 10 226 13 227 19 L 230 43 L 230 63 L 204 63 C 204 51 182 51 182 63 L 68 63 C 68 51 46 51 46 63 L 12 63 Z" fill="url(#hirkaniPurple)" stroke="#4C1D95" stroke-width="1"/>
+            <rect x="12.5" y="35.5" width="217" height="9.5" fill="#F3E8FF"/>
+            <rect x="12.5" y="34.5" width="217" height="1.5" fill="#FACC15"/>
+            <rect x="12.5" y="45" width="217" height="1.5" fill="#FACC15"/>
+            <g fill="#1E293B" stroke="#E2E8F0" stroke-width="0.9">
+              <rect x="18" y="17" width="26" height="15" rx="2"/>
+              <rect x="48" y="17" width="26" height="15" rx="2"/>
+              <rect x="78" y="17" width="26" height="15" rx="2"/>
+              <rect x="108" y="17" width="26" height="15" rx="2"/>
+              <rect x="138" y="17" width="26" height="15" rx="2"/>
+              <rect x="168" y="17" width="23" height="15" rx="2"/>
+            </g>
+            <g fill="#E9D5FF" opacity="0.72">
+              <rect x="19.2" y="18.2" width="23.6" height="12.6" rx="1.2"/>
+              <rect x="49.2" y="18.2" width="23.6" height="12.6" rx="1.2"/>
+              <rect x="79.2" y="18.2" width="23.6" height="12.6" rx="1.2"/>
+              <rect x="109.2" y="18.2" width="23.6" height="12.6" rx="1.2"/>
+              <rect x="139.2" y="18.2" width="23.6" height="12.6" rx="1.2"/>
+              <rect x="169.2" y="18.2" width="20.6" height="12.6" rx="1.2"/>
+            </g>
+            <rect x="195" y="19.5" width="16" height="41" rx="1.8" fill="#1E293B" stroke="#F8FAFC" stroke-width="1"/>
+            <rect x="197" y="21.5" width="5.2" height="18" rx="0.8" fill="#E0F2FE" opacity="0.88"/>
+            <rect x="203.8" y="21.5" width="5.2" height="18" rx="0.8" fill="#E0F2FE" opacity="0.88"/>
+            <path d="M 215 19.5 L 225.5 19.5 L 228 34 L 215 34 Z" fill="#E0F2FE" stroke="#0F172A" stroke-width="1"/>
+            <text x="104" y="42.4" text-anchor="middle" font-size="6.6" font-weight="900" fill="#581C87" letter-spacing="0.8">MSRTC • हिरकणी</text>
+            <rect x="226" y="49" width="4.5" height="7" rx="1.2" fill="#FEF9C3" stroke="#CA8A04" stroke-width="0.8"/>
+            <rect x="11.5" y="48" width="3" height="8" rx="0.8" fill="#FBBF24"/>
+            <rect x="8" y="61" width="10" height="4" rx="1.5" fill="#1E293B"/>
+            <rect x="222" y="61" width="11" height="4" rx="1.5" fill="#1E293B"/>
+          </g>
+          <g class="kombi-wheel">
+            <circle cx="57" cy="64" r="12" fill="#0F172A" stroke="#1E293B" stroke-width="1.6"/>
+            <circle cx="57" cy="64" r="7.2" fill="#E2E8F0" stroke="#64748B" stroke-width="1"/>
+            <circle cx="57" cy="64" r="3.4" fill="#7E22CE"/>
+          </g>
+          <g class="kombi-wheel">
+            <circle cx="193" cy="64" r="12" fill="#0F172A" stroke="#1E293B" stroke-width="1.6"/>
+            <circle cx="193" cy="64" r="7.2" fill="#E2E8F0" stroke="#64748B" stroke-width="1"/>
+            <circle cx="193" cy="64" r="3.4" fill="#7E22CE"/>
+          </g>
+        </svg>
+      </div>`;
+
+    const MSRTC_ESHIVAI_EV_BUS_SVG = `
+      <div class="vehicle-wrapper">
+        <svg viewBox="0 0 245 84" class="svg-msrtc" aria-label="MSRTC E-Shivai Electric AC Bus">
+          <defs>
+            <linearGradient id="eshivaiGreen" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#16A34A"/>
+              <stop offset="100%" stop-color="#15803D"/>
+            </linearGradient>
+            <linearGradient id="eshivaiBeam" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stop-color="rgba(254, 249, 195, 0.85)"/>
+              <stop offset="100%" stop-color="rgba(254, 249, 195, 0)"/>
+            </linearGradient>
+          </defs>
+          <polygon points="228,53 282,40 282,69" fill="url(#eshivaiBeam)"/>
+          <ellipse cx="120" cy="77" rx="108" ry="4.5" fill="rgba(2, 6, 23, 0.78)"/>
+          <g class="kombi-body-bounce">
+            <rect x="64" y="5" width="44" height="5" rx="2" fill="#86EFAC" stroke="#166534" stroke-width="0.8"/>
+            <rect x="138" y="5" width="44" height="5" rx="2" fill="#86EFAC" stroke="#166534" stroke-width="0.8"/>
+            <path d="M 12 63 L 12 15 C 12 11 16 10 22 10 L 216 10 C 223 10 227 13 228 19 L 231 44 L 231 63 L 204 63 C 204 51 182 51 182 63 L 68 63 C 68 51 46 51 46 63 L 12 63 Z" fill="url(#eshivaiGreen)" stroke="#14532D" stroke-width="1"/>
+            <rect x="12.5" y="37" width="218" height="7" fill="#DCFCE7"/>
+            <g fill="#0F172A" stroke="#E2E8F0" stroke-width="0.9">
+              <rect x="20" y="16" width="28" height="16" rx="2.5"/>
+              <rect x="52" y="16" width="28" height="16" rx="2.5"/>
+              <rect x="84" y="16" width="28" height="16" rx="2.5"/>
+              <rect x="116" y="16" width="28" height="16" rx="2.5"/>
+              <rect x="148" y="16" width="28" height="16" rx="2.5"/>
+            </g>
+            <g fill="#86EFAC" opacity="0.45">
+              <rect x="21.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+              <rect x="53.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+              <rect x="85.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+              <rect x="117.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+              <rect x="149.2" y="17.2" width="25.6" height="13.6" rx="1.6"/>
+            </g>
+            <rect x="184" y="16" width="15" height="44" rx="1.5" fill="#1E293B" stroke="#E2E8F0" stroke-width="0.9"/>
+            <rect x="186" y="18" width="11" height="22" rx="1" fill="#BAE6FD" opacity="0.7"/>
+            <path d="M 205 16 L 222 16 L 226 35 L 205 35 Z" fill="#1E293B" stroke="#E2E8F0" stroke-width="1"/>
+            <path d="M 206.5 17.5 L 220.5 17.5 L 224 33.5 L 206.5 33.5 Z" fill="#7DD3FC" opacity="0.65"/>
+            <text x="102" y="42.8" text-anchor="middle" font-size="6.2" font-weight="900" fill="#14532D" letter-spacing="0.8">MSRTC • ई-शिवई EV</text>
+            <rect x="227" y="48" width="4" height="7" rx="1.2" fill="#FEF9C3" stroke="#CA8A04" stroke-width="0.8"/>
+            <rect x="11.5" y="48" width="3" height="8" rx="0.8" fill="#FACC15"/>
+            <rect x="8" y="61" width="10" height="4" rx="1.5" fill="#1E293B"/>
+            <rect x="223" y="61" width="11" height="4" rx="1.5" fill="#1E293B"/>
+          </g>
+          <g class="kombi-wheel">
+            <circle cx="57" cy="64" r="12" fill="#0F172A" stroke="#1E293B" stroke-width="1.6"/>
+            <circle cx="57" cy="64" r="7.2" fill="#E2E8F0" stroke="#64748B" stroke-width="1"/>
+            <circle cx="57" cy="64" r="3.4" fill="#16A34A"/>
+          </g>
+          <g class="kombi-wheel">
+            <circle cx="193" cy="64" r="12" fill="#0F172A" stroke="#1E293B" stroke-width="1.6"/>
+            <circle cx="193" cy="64" r="7.2" fill="#E2E8F0" stroke="#64748B" stroke-width="1"/>
+            <circle cx="193" cy="64" r="3.4" fill="#16A34A"/>
+          </g>
+        </svg>
+      </div>`;
+
     const ROAD_FLEET_CARS = [
-      { id: 'msrtcBus', svg: MSRTC_LAL_PARI_BUS_SVG, slotIndex: 0, bottomClass: 'pos-bottom-6' },
-      { id: 'kombi', svg: SAFARI_VEHICLE_SVG, slotIndex: 1, bottomClass: 'pos-bottom-8' },
-      { id: 'scramBike', svg: RE_SCRAM_BIKE_SVG, slotIndex: 2, bottomClass: 'pos-bottom-6' },
-      { id: 'orangeCoupe', svg: VINTAGE_ORANGE_COUPE_SVG, slotIndex: 3, bottomClass: 'pos-bottom-6' },
-      { id: 'xsrBike', svg: YAMAHA_XSR_BIKE_SVG, slotIndex: 4, bottomClass: 'pos-bottom-10' },
-      { id: 'yellowHatch', svg: VINTAGE_YELLOW_HATCH_SVG, slotIndex: 5, bottomClass: 'pos-bottom-10' }
+      { id: 'msrtcLalPari', svg: MSRTC_LAL_PARI_BUS_SVG, slotIndex: 0, bottomClass: 'pos-bottom-6', direction: 'right' },
+      { id: 'safariKombiVan', svg: SAFARI_VEHICLE_SVG, slotIndex: 1, bottomClass: 'pos-bottom-8', direction: 'left' },
+      { id: 'msrtcShivshahi', svg: MSRTC_SHIVSHAHI_COACH_SVG, slotIndex: 2, bottomClass: 'pos-bottom-6', direction: 'right' },
+      { id: 'orangeCoupeCar', svg: VINTAGE_ORANGE_COUPE_SVG, slotIndex: 3, bottomClass: 'pos-bottom-8', direction: 'left' },
+      { id: 'msrtcHirkani', svg: MSRTC_HIRKANI_BUS_SVG, slotIndex: 4, bottomClass: 'pos-bottom-6', direction: 'right' },
+      { id: 'yellowHatchCar', svg: VINTAGE_YELLOW_HATCH_SVG, slotIndex: 5, bottomClass: 'pos-bottom-8', direction: 'left' },
+      { id: 'msrtcShivneri', svg: MSRTC_SHIVNERI_COACH_SVG, slotIndex: 6, bottomClass: 'pos-bottom-6', direction: 'right' },
+      { id: 'msrtcEShivai', svg: MSRTC_ESHIVAI_EV_BUS_SVG, slotIndex: 7, bottomClass: 'pos-bottom-8', direction: 'left' }
     ];
 
     function initRoadMultiCars(speedMultiplier = 1) {
       const fleetEl = document.getElementById('roadMultiCarFleet');
       if (!fleetEl) return;
 
-      const baseCycleSeconds = 18;
+      const isMobile = window.innerWidth < 640;
+      const baseCycleSeconds = isMobile ? 26 : 18;
       const cycleDuration = baseCycleSeconds / speedMultiplier;
       const spacingInterval = cycleDuration / ROAD_FLEET_CARS.length;
 
       fleetEl.innerHTML = ROAD_FLEET_CARS.map(car => {
         const delay = -(car.slotIndex * spacingInterval).toFixed(2);
+        const isLeft = car.direction === 'left';
+        const laneClass = isLeft ? 'reverse-lane' : '';
+        const orientedSvg = isLeft
+          ? car.svg.replace('class="vehicle-wrapper"', 'class="vehicle-wrapper facing-left"')
+          : car.svg;
         return `
-          <div class="road-car-anim ${car.bottomClass}"
+          <div class="road-car-anim ${car.bottomClass} ${laneClass}"
                style="animation-duration: ${cycleDuration.toFixed(2)}s; animation-delay: ${delay}s;">
-            ${car.svg}
+            ${orientedSvg}
           </div>
         `;
       }).join('');
@@ -3731,10 +3736,10 @@
     let cachedExactGeoJson = null;
 
     const LABEL_NUDGES = {
-      mumbai_suburban:           { dx: -14, dy: -7 },
-      mumbai_city:               { dx: -12, dy: 9 },
+      mumbai_suburban:           { dx: 4,   dy: -7 },
+      mumbai_city:               { dx: 3,   dy: 9 },
       thane:                     { dx: 4,   dy: -5 },
-      palghar:                   { dx: -2,  dy: -2 },
+      palghar:                   { dx: -1,  dy: -2 },
       chhatrapati_sambhajinagar: { dx: -8,  dy: -3 },
       jalna:                     { dx: 4,   dy: 6 },
       nagpur:                    { dx: -10, dy: -3 },
@@ -3891,9 +3896,9 @@
     function getMapFitBounds(width, height) {
       const isMobile = width < 1024;
       if (isMobile) {
-        const topOffset = width < 640 ? 44 : 40;
-        const bottomReserve = width < 640 ? 64 : 74;
-        return [[18, topOffset], [Math.max(250, width - 10), Math.max(240, height - bottomReserve)]];
+        const topOffset = width < 640 ? 60 : 54;
+        const bottomReserve = width < 640 ? Math.round(height * 0.24) : Math.round(height * 0.24);
+        return [[36, topOffset], [Math.max(250, width - 12), Math.max(240, height - bottomReserve)]];
       }
       const rightPad = Math.max(440, width - Math.min(480, Math.round(width * 0.34)));
       return [[6, 4], [Math.max(260, rightPad), Math.max(260, height - 10)]];
@@ -4169,12 +4174,83 @@
       const welcomeEl = document.getElementById('welcomeBrandBanner');
       if (panelEl) panelEl.classList.add('hidden');
       if (welcomeEl) welcomeEl.classList.remove('hidden');
-      appState.selectedDistrictId = null;
-      appState.isLocked = false;
-      appState.fromDistrictId = '';
-      appState.toDistrictId = '';
-      updateMilesTracker(true);
-      updateMapStyling();
+      if (appState.selectedDistrictId !== null || appState.isLocked || appState.fromDistrictId || appState.toDistrictId) {
+        appState.selectedDistrictId = null;
+        appState.isLocked = false;
+        appState.fromDistrictId = '';
+        appState.toDistrictId = '';
+        updateMilesTracker(true);
+        updateMapStyling();
+      }
+    }
+
+      function fastHidePopupOnScroll() {
+      const panelEl = document.getElementById('districtPlacesPanel');
+      if (panelEl && !panelEl.classList.contains('hidden')) {
+        const rect = panelEl.getBoundingClientRect();
+        spawnPopupScrollSmoke(rect.left + rect.width / 2, rect.top + Math.min(rect.height / 2, 130));
+        panelEl.classList.add('hidden');
+        const welcomeEl = document.getElementById('welcomeBrandBanner');
+        if (welcomeEl) welcomeEl.classList.remove('hidden');
+        appState.selectedDistrictId = null;
+        appState.isLocked = false;
+        appState.fromDistrictId = '';
+        appState.toDistrictId = '';
+        if (mapRoot) {
+          mapRoot.selectAll('g.safari-tracker-route').remove();
+          mapRoot.selectAll('path.district-path').classed('active-selected', false);
+        }
+        const fromSel = document.getElementById('fromDistrictSelect');
+        const toSel = document.getElementById('toDistrictSelect');
+        const kmEl = document.getElementById('trackerKmVal');
+        const timeEl = document.getElementById('trackerDriveTime');
+        if (fromSel) fromSel.value = '';
+        if (toSel) toSel.value = '';
+        if (kmEl) kmEl.textContent = '0';
+        if (timeEl) timeEl.textContent = '(Select From & To)';
+      }
+    }
+
+    function spawnPopupScrollSmoke(centerX, centerY) {
+      const burst = document.createElement('div');
+      burst.className = 'scroll-smoke-burst';
+      burst.style.left = `${Math.round(centerX)}px`;
+      burst.style.top = `${Math.round(centerY)}px`;
+
+      const puffs = [
+        { dx: -145, dy: -28, size: 78,  drift: '-34px', delay: '0ms',   r0: '-8deg',  r1: '10deg',  r2: '24deg' },
+        { dx: -98,  dy: -44, size: 92,  drift: '-20px', delay: '25ms',  r0: '6deg',   r1: '-12deg', r2: '-26deg' },
+        { dx: -48,  dy: -36, size: 104, drift: '-8px',  delay: '45ms',  r0: '-12deg', r1: '14deg',  r2: '30deg' },
+        { dx: 8,    dy: -48, size: 112, drift: '12px',  delay: '65ms',  r0: '4deg',   r1: '18deg',  r2: '35deg' },
+        { dx: 66,   dy: -38, size: 96,  drift: '24px',  delay: '85ms',  r0: '10deg',  r1: '-10deg', r2: '-22deg' },
+        { dx: 124,  dy: -24, size: 82,  drift: '38px',  delay: '105ms', r0: '-6deg',  r1: '12deg',  r2: '28deg' },
+        { dx: -120, dy: 22,  size: 84,  drift: '-28px', delay: '120ms', r0: '12deg',  r1: '-8deg',  r2: '-20deg' },
+        { dx: -64,  dy: 30,  size: 98,  drift: '-12px', delay: '145ms', r0: '-10deg', r1: '15deg',  r2: '32deg' },
+        { dx: -4,   dy: 26,  size: 106, drift: '6px',   delay: '165ms', r0: '8deg',   r1: '-14deg', r2: '-30deg' },
+        { dx: 56,   dy: 28,  size: 94,  drift: '20px',  delay: '185ms', r0: '-4deg',  r1: '11deg',  r2: '25deg' },
+        { dx: 112,  dy: 18,  size: 80,  drift: '32px',  delay: '210ms', r0: '6deg',   r1: '-9deg',  r2: '-18deg' }
+      ];
+
+      puffs.forEach((p, idx) => {
+        const puff = document.createElement('span');
+        puff.className = 'scroll-smoke-puff';
+        puff.style.width = `${p.size}px`;
+        puff.style.height = `${Math.round(p.size * (idx % 2 === 0 ? 0.78 : 0.88))}px`;
+        puff.style.marginLeft = `${p.dx}px`;
+        puff.style.marginTop = `${p.dy}px`;
+        puff.style.borderRadius = idx % 2 === 0
+          ? '54% 46% 58% 42% / 44% 56% 44% 56%'
+          : '42% 58% 45% 55% / 57% 43% 56% 44%';
+        puff.style.setProperty('--smoke-drift', p.drift);
+        puff.style.setProperty('--smoke-rot-start', p.r0);
+        puff.style.setProperty('--smoke-rot-mid', p.r1);
+        puff.style.setProperty('--smoke-rot-end', p.r2);
+        puff.style.animationDelay = p.delay;
+        burst.appendChild(puff);
+      });
+
+      document.body.appendChild(burst);
+      setTimeout(() => burst.remove(), 1280);
     }
 
     function renderDistrictPlacesList(districtId, animatePanel = true, openPopup = true, lockSelection = false) {
@@ -4288,6 +4364,10 @@
         }
       });
 
+      window.addEventListener('scroll', fastHidePopupOnScroll, { passive: true, capture: true });
+      window.addEventListener('wheel', fastHidePopupOnScroll, { passive: true, capture: true });
+      window.addEventListener('touchmove', fastHidePopupOnScroll, { passive: true, capture: true });
+
       const mobileToggleBtn = document.getElementById('mobileNavToggleBtn');
       const mobileNavMenu = document.getElementById('mobileNavMenu');
       if (mobileToggleBtn && mobileNavMenu) {
@@ -4399,7 +4479,10 @@
       let resizeTimer;
       window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => initMaharashtraMap(), 250);
+        resizeTimer = setTimeout(() => {
+          initMaharashtraMap();
+          initRoadMultiCars(1);
+        }, 250);
       });
     });
 
