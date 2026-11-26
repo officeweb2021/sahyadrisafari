@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sahyadri Safari | Explore Maharashtra</title>
+  <title>The Sahyadri Safari Co. | Maharashtra 36-District Interactive Expedition Map</title>
   <!-- D3.js & TopoJSON for realistic district cartography -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://unpkg.com/topojson-client@3"></script>
@@ -3889,7 +3889,7 @@
     function getMapFitBounds(width, height) {
       const isMobile = width < 1024;
       if (isMobile) {
-        return [[32, 54], [Math.max(250, width - 14), Math.max(280, height - 150)]];
+        return [[30, 50], [Math.max(250, width - 14), Math.max(240, height - 205)]];
       }
       const rightPad = Math.max(440, width - Math.min(480, Math.round(width * 0.34)));
       return [[6, 4], [Math.max(260, rightPad), Math.max(260, height - 10)]];
