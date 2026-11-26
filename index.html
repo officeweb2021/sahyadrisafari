@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title> Sahyadri Safari Tour N Travaller| Explore the Maharahstra </title>
+  <title>Sahyadri Safari | Explore Maharashtra</title>
   <!-- D3.js & TopoJSON for realistic district cartography -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://unpkg.com/topojson-client@3"></script>
@@ -71,6 +71,8 @@
       position: relative;
       overflow: hidden;
       height: 100vh;
+      height: 100dvh;
+      min-height: 560px;
       width: 100%;
       display: flex;
       flex-direction: column;
@@ -748,14 +750,14 @@
        FROM -> TO DISTRICT DISTANCE TRACKER BAR
        ========================================================================= */
     .route-tracker-bar {
-      position: fixed;
-      top: 66px;
-      left: 52px;
-      right: 10px;
+      position: absolute;
+      top: 8px;
+      left: 50px;
+      right: 8px;
       bottom: auto;
       transform: none;
       width: auto;
-      max-width: calc(100vw - 62px);
+      max-width: calc(100% - 58px);
       z-index: 30;
       display: flex;
       flex-wrap: wrap;
@@ -766,8 +768,8 @@
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
       border: 1px solid rgba(251, 191, 36, 0.8);
-      border-radius: 16px;
-      padding: 6px 10px;
+      border-radius: 14px;
+      padding: 5px 8px;
       box-shadow: 0 8px 28px rgba(15, 23, 42, 0.45);
     }
 
@@ -787,7 +789,7 @@
         right: auto;
         transform: translateX(-50%);
         width: max-content;
-        max-width: calc(100vw - 32px);
+        max-width: calc(100% - 32px);
         justify-content: flex-start;
         border-radius: 9999px;
       }
@@ -965,28 +967,27 @@
 
     .welcome-brand-banner {
       position: absolute;
-      bottom: 94px;
-      left: auto;
-      right: 16px;
-      transform: none;
+      bottom: 86px;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
       z-index: 20;
       pointer-events: none;
       user-select: none;
       display: inline-flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: flex-end;
       width: max-content;
-      max-width: min(94vw, 460px);
-      padding: 6px 10px;
+      max-width: calc(100vw - 24px);
+      padding: 4px 8px;
       transition: none;
     }
 
     @media (min-width: 640px) {
       .welcome-brand-banner {
-        right: 24px;
-        bottom: 102px;
+        bottom: 94px;
         max-width: min(90vw, 560px);
-        padding: 10px 14px;
+        padding: 8px 12px;
       }
     }
 
@@ -1003,7 +1004,7 @@
 
     .welcome-heading {
       font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
-      font-size: clamp(36px, 8.8vw, 56px);
+      font-size: clamp(32px, 8.4vw, 52px);
       font-weight: 800;
       letter-spacing: -0.02em;
       color: #0B192C;
@@ -1014,30 +1015,7 @@
 
     @media (min-width: 640px) {
       .welcome-heading {
-        font-size: clamp(46px, 6.2vw, 66px);
-      }
-    }
-
-    @media (min-width: 1024px) {
-      .welcome-heading {
-        font-size: clamp(56px, 5.2vw, 84px);
-      }
-    }
-
-    .welcome-heading {
-      font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
-      font-size: clamp(38px, 9.2vw, 60px);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: #0B192C;
-      line-height: 1.04;
-      white-space: nowrap;
-      filter: drop-shadow(0 2px 6px rgba(255, 255, 255, 0.95));
-    }
-
-    @media (min-width: 640px) {
-      .welcome-heading {
-        font-size: clamp(50px, 6.8vw, 72px);
+        font-size: clamp(48px, 6.4vw, 68px);
       }
     }
 
@@ -1048,9 +1026,9 @@
     }
 
     .welcome-tagline {
-      margin-top: 4px;
+      margin-top: 3px;
       font-family: 'Plus Jakarta Sans', 'Montserrat', sans-serif;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 800;
       letter-spacing: 0.04em;
       text-transform: none;
@@ -1064,7 +1042,7 @@
     @media (min-width: 640px) {
       .welcome-tagline {
         margin-top: 4px;
-        font-size: 14px;
+        font-size: 13px;
       }
     }
 
@@ -3657,15 +3635,26 @@
         .attr('stroke-linejoin', 'round');
 
       const traveler = routeG.append('text')
+        .attr('x', midX.toFixed(1))
+        .attr('y', midY.toFixed(1))
         .attr('font-size', '18px')
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central')
         .text('🚙');
 
-      traveler.append('animateMotion')
-        .attr('dur', '3.5s')
-        .attr('repeatCount', 'indefinite')
-        .attr('path', pathD);
+      let animFrameId = null;
+      const startTime = performance.now();
+      const durationMs = 3500;
+      function stepRouteVehicle(now) {
+        if (!document.body.contains(traveler.node())) return;
+        const t = ((now - startTime) % durationMs) / durationMs;
+        const inv = 1 - t;
+        const x = inv * inv * p1[0] + 2 * inv * t * midX + t * t * p2[0];
+        const y = inv * inv * p1[1] + 2 * inv * t * midY + t * t * p2[1];
+        traveler.attr('x', x.toFixed(1)).attr('y', y.toFixed(1));
+        animFrameId = requestAnimationFrame(stepRouteVehicle);
+      }
+      animFrameId = requestAnimationFrame(stepRouteVehicle);
     }
 
     function initMilesTrackerDropdowns() {
@@ -3740,10 +3729,10 @@
     let cachedExactGeoJson = null;
 
     const LABEL_NUDGES = {
-      mumbai_suburban:           { dx: -30, dy: -6 },
-      mumbai_city:               { dx: -26, dy: 9 },
+      mumbai_suburban:           { dx: -14, dy: -7 },
+      mumbai_city:               { dx: -12, dy: 9 },
       thane:                     { dx: 4,   dy: -5 },
-      palghar:                   { dx: -6,  dy: -2 },
+      palghar:                   { dx: -2,  dy: -2 },
       chhatrapati_sambhajinagar: { dx: -8,  dy: -3 },
       jalna:                     { dx: 4,   dy: 6 },
       nagpur:                    { dx: -10, dy: -3 },
@@ -3899,7 +3888,10 @@
 
     function getMapFitBounds(width, height) {
       const isMobile = width < 1024;
-      const rightPad = isMobile ? width - 8 : Math.max(440, width - Math.min(480, Math.round(width * 0.34)));
+      if (isMobile) {
+        return [[32, 54], [Math.max(250, width - 14), Math.max(280, height - 150)]];
+      }
+      const rightPad = Math.max(440, width - Math.min(480, Math.round(width * 0.34)));
       return [[6, 4], [Math.max(260, rightPad), Math.max(260, height - 10)]];
     }
 
