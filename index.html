@@ -967,7 +967,8 @@
 
     .welcome-brand-banner {
       position: absolute;
-      bottom: 86px;
+      top: auto;
+      bottom: 64px;
       left: 50%;
       right: auto;
       transform: translateX(-50%);
@@ -978,15 +979,16 @@
       flex-direction: column;
       align-items: flex-end;
       width: max-content;
-      max-width: calc(100vw - 24px);
+      max-width: calc(100vw - 148px);
       padding: 4px 8px;
       transition: none;
     }
 
     @media (min-width: 640px) {
       .welcome-brand-banner {
-        bottom: 94px;
-        max-width: min(90vw, 560px);
+        top: auto;
+        bottom: 68px;
+        max-width: min(72vw, 520px);
         padding: 8px 12px;
       }
     }
@@ -1004,7 +1006,7 @@
 
     .welcome-heading {
       font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
-      font-size: clamp(32px, 8.4vw, 52px);
+      font-size: clamp(24px, 6.4vw, 40px);
       font-weight: 800;
       letter-spacing: -0.02em;
       color: #0B192C;
@@ -1015,7 +1017,7 @@
 
     @media (min-width: 640px) {
       .welcome-heading {
-        font-size: clamp(48px, 6.4vw, 68px);
+        font-size: clamp(42px, 5.8vw, 64px);
       }
     }
 
@@ -3889,7 +3891,9 @@
     function getMapFitBounds(width, height) {
       const isMobile = width < 1024;
       if (isMobile) {
-        return [[30, 50], [Math.max(250, width - 14), Math.max(240, height - 205)]];
+        const topOffset = width < 640 ? 44 : 40;
+        const bottomReserve = width < 640 ? 64 : 74;
+        return [[18, topOffset], [Math.max(250, width - 10), Math.max(240, height - bottomReserve)]];
       }
       const rightPad = Math.max(440, width - Math.min(480, Math.round(width * 0.34)));
       return [[6, 4], [Math.max(260, rightPad), Math.max(260, height - 10)]];
